@@ -10,6 +10,7 @@
 #include "autoaim_task.h"
 #include "judge_task.h"
 #include "detect_task.h"
+#include "shell_task.h"
 #include "string.h" //memset使用
 #include "timer6.h"
 
@@ -98,6 +99,14 @@ void Start_Task(void *pvParameters)
 							(void*          )NULL,
 							(UBaseType_t    )5,
 							(TaskHandle_t*  )&DetectTask_Handler);
+
+	//创建Shell任务
+	xTaskCreate((TaskFunction_t )Shell_Task,     
+							(const char*    )"shell_task",   
+							(uint16_t       )256,
+							(void*          )NULL,
+							(UBaseType_t    )5,
+							(TaskHandle_t*  )&ShellTask_Handler);
 	
 	//创建监听CPU使用率任务
 	#if CHECK_CPU_USE

@@ -1,4 +1,5 @@
 #include "math2.h"
+#include "infantry.h"
 
 /* 快速开方 */
 float Quick_Sqrt(float num)
@@ -75,12 +76,51 @@ float Hex4_To_Float1(unsigned char *array)
 	}
 	f = *((float *)((array_copy)));
 	return f;
-	
 }
 
 u16 U8_Array_To_U16(u8 *array)
 {	
 	return ( (array[1]<<8) | array[0] );
+}
+#include "usart3.h"
+//数组解析出float
+float String_To_Float(char *array)
+{
+	uint8_t len = 0;
+	uint8_t point_num = 0;
+	short f1 = 0;
+	float f2 = 0;
+	while(array[len])
+	{
+		if(array[len] == '.')
+		{
+			point_num = len;
+		}
+		len++;
+	}
+	for(u8 i=0; i<point_num; i++)
+	{
+		f1 *= 10;
+		f1 += (array[i] - '0');
+	}
+	for(u8 i=len-1; i>point_num; i--)
+	{
+		f2 += (array[i] - '0');
+		f2 /= 10;
+	}
+	return ( f1 + f2 );
+}
+
+u8 Str_Compare(char * str1, char * str2, u16 len)
+{
+	for(u16 i=0; i<len; i++)
+	{
+		if(str1[i] != str2[i])
+		{
+			return 0;
+		}
+	}
+	return 1;
 }
 
 /* 角度Pid时，在获取tar和cur之后紧接着调用 */
@@ -119,10 +159,10 @@ void Handle_Angle360_PID_Over_Zero(float *tar, float *cur)
  * 0~8191 -> 0~360
  * ROBOT_HEAD_ANGLE 宏定义是将云台的头和底盘的头对其，读出的GM6020机械角度
 */
-#define ROBOT_HEAD_ANGLE 2735
+#define ROBOT_HEAD_ANGLE YAW_GM6020_HEAD_ANGLE
 float GM6020_YAW_Angle_To_360(uint16_t gm6020_angle)
 {
-	int16_t yaw_angle = gm6020_angle-2735;
+	int16_t yaw_angle = gm6020_angle - ROBOT_HEAD_ANGLE;
 	if(yaw_angle<0)
 	{
 		yaw_angle += 8191;

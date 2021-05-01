@@ -10,7 +10,7 @@
       <TargetName>Infantry</TargetName>
       <ToolsetNumber>0x4</ToolsetNumber>
       <ToolsetName>ARM-ADS</ToolsetName>
-      <pCCUsed>5060960::V5.06 update 7 (build 960)::.\ARMCC</pCCUsed>
+      <pCCUsed>5060750::V5.06 update 6 (build 750)::ARMCC</pCCUsed>
       <uAC6>0</uAC6>
       <TargetOption>
         <TargetCommonOption>
@@ -338,7 +338,7 @@
               <MiscControls></MiscControls>
               <Define>STM32F427_437xx,USE_STDPERIPH_DRIVER,__FPU_USED,__FPU_PRESENT,ARM_MATH_CM4,__CC_ARM,ARM_MATH_MATRIX_CHECK,ARM_MATH_ROUNDING</Define>
               <Undefine></Undefine>
-              <IncludePath>..\CMISS;..\CMISS\DSP\include;..\FreeRTOS\include;..\FreeRTOS\portable\RVDS\ARM_CM4F;..\USER;..\FWLIB\inc;..\DEVICE\inc;..\HARDWARE\inc;..\USERLIB\inc;..\TASK\inc</IncludePath>
+              <IncludePath>..\CMISS;..\CMISS\DSP\include;..\FreeRTOS\include;..\FreeRTOS\portable\RVDS\ARM_CM4F;..\USER;..\FWLIB\inc;..\DEVICE\inc;..\HARDWARE\inc;..\USERLIB\inc;..\USERLIB\shell;..\TASK\inc</IncludePath>
             </VariousControls>
           </Cads>
           <Aads>
@@ -810,6 +810,11 @@
           <GroupName>USER</GroupName>
           <Files>
             <File>
+              <FileName>infantry.h</FileName>
+              <FileType>5</FileType>
+              <FilePath>..\USER\infantry.h</FilePath>
+            </File>
+            <File>
               <FileName>main.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\USER\main.c</FilePath>
@@ -957,6 +962,26 @@
           </Files>
         </Group>
         <Group>
+          <GroupName>SHELL</GroupName>
+          <Files>
+            <File>
+              <FileName>shell.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\USERLIB\shell\shell.c</FilePath>
+            </File>
+            <File>
+              <FileName>shellio.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\USERLIB\shell\shellio.c</FilePath>
+            </File>
+            <File>
+              <FileName>user_commands.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\USERLIB\shell\user_commands.c</FilePath>
+            </File>
+          </Files>
+        </Group>
+        <Group>
           <GroupName>TASK</GroupName>
           <Files>
             <File>
@@ -1013,6 +1038,11 @@
               <FileName>detect_task.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\TASK\src\detect_task.c</FilePath>
+            </File>
+            <File>
+              <FileName>shell_task.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\TASK\src\shell_task.c</FilePath>
             </File>
           </Files>
         </Group>

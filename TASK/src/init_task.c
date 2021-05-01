@@ -1,4 +1,5 @@
 #include "init_task.h"
+#include "infantry.h"
 #include "led.h"
 #include "delay.h"
 #include "power_output.h"
@@ -12,7 +13,7 @@
 #include "timer2.h"
 #include "timer6.h"
 #include "buzzer.h"
-
+#include "shell.h"
 
 static void Print_Logo_2_Com(void);
 
@@ -27,11 +28,14 @@ void All_Init(void)
 	/* 初始化串口3 */
 	Usart3_Init();
 	Print_Logo_2_Com();
-	INFO_PRINT("\r\nHLL_2021_New_Infantry_v0.9\r\n");
+	INFO_PRINT("\r\nHLL 2021 New Infantry %s\r\n", VERSION);
+
 	/* 初始化遥控器（串口1） */
 	Usart1_Init();
+	
 	/* 初始化CAN1 */
 	Can1_Init();
+
 	/* 初始化CAN2 */
 	Can2_Init();
 	
@@ -58,6 +62,9 @@ void All_Init(void)
 	POWER3_CTRL_ON;
 	POWER4_CTRL_ON;
 	
+	/* Shell初始化 */
+	Shell_Init();
+
 	INFO_PRINT("\r\nAll peripheral init.\r\n");
 	Led_Flow_On();
 }

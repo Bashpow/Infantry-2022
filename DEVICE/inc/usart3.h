@@ -34,6 +34,9 @@
 
 void Usart3_Init(void);
 
+char* Get_Usart3_Rx_Buffer(void);
+u8 Get_Usart3_Rx_Length(void);
+
 #endif
 
 
