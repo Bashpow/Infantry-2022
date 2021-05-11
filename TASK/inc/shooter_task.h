@@ -10,7 +10,8 @@ extern TaskHandle_t ShooterTask_Handler;
 
 void Shooter_Task(void *pvParameters);
 
+void Set_Shoot_key(u8 key);
+
 void Shooter_Friction_Speed_Limit(void);
-void First_Shoot_Friction_Speed_Subtract(uint16_t minus_speed);
 
 #endif

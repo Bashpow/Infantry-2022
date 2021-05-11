@@ -48,8 +48,19 @@ void CAN2_RX0_IRQHandler(void)
 }
 
 //计算发射机构波轮电机速度PID，并输出
+/*
 void Set_Shooter_Wave_Motors_Speed(float wave_wheel)
 {
+	Can2_Send_4Msg(CAN_SHOOTER_ALL_ID,\
+	               Pid_Position_Calc(&motor_wave_speed_pid, wave_wheel, shooter_wave_motor.speed_rpm),\
+	               0,\
+	               0,\
+	               0);
+}
+*/
+void Set_Shooter_Wave_Motors_Speed(float wave_wheel)
+{
+	// DEBUG_PRINT("%.1f,%d\r\n", wave_wheel, shooter_wave_motor.speed_rpm);
 	Can2_Send_4Msg(CAN_SHOOTER_ALL_ID,\
 	               Pid_Position_Calc(&motor_wave_speed_pid, wave_wheel, shooter_wave_motor.speed_rpm),\
 	               0,\
@@ -78,7 +89,7 @@ void Set_Gimbal_Motors_Speed(float speed_yaw, float speed_pitch)
 	//if(fre == 100)
 	{
 	 // fre = 0;	
-	  printf("%.1f, %d, %.1f, %.1f, %.1f, %.1f\r\n",speed_yaw, gimbal_motor->speed_rpm, motor_yaw_speed_pid.p_out,motor_yaw_speed_pid.i_out,motor_yaw_speed_pid.d_out,motor_yaw_speed_pid.output);
+	  //printf("%.1f, %d, %.1f, %.1f, %.1f, %.1f\r\n",speed_yaw, gimbal_motor->speed_rpm, motor_yaw_speed_pid.p_out,motor_yaw_speed_pid.i_out,motor_yaw_speed_pid.d_out,motor_yaw_speed_pid.output);
 	}
 }
 

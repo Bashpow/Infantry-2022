@@ -119,7 +119,7 @@ void Gimbal_Task(void *pvParameters)
 		//Ò£¿ØÆ÷Ä£Ê½
 		else if(chassis_robot_mode->control_device == 2)
 		{
-			switch(chassis_robot_mode->motion_mode)
+			switch(chassis_robot_mode->rc_motion_mode)
 			{
 				//µ×ÅÌ¸úËæ
 				case 1:
@@ -196,6 +196,8 @@ void Gimbal_Task(void *pvParameters)
 			
 		}
 		
+		vTaskDelay(1);
+
 	}
 	
 	//vTaskDelete(NULL);

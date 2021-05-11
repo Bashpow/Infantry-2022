@@ -1,5 +1,6 @@
 #include "chassis_task.h"
 
+#include "infantry.h"
 #include "remoter_task.h"
 #include "can1_motor.h"
 #include "can2_motor.h"
@@ -20,9 +21,11 @@ static const Motor_measure_t* yaw_motor;
 const static Judge_data_t* judge_data;
 // const static Super_capacitor_t* super_capacitor;
 
+static float chassis_motor_dynamic_rate = 10;
+static float chassis_motor_boost_rate = 1.0f;  //调用相应函数更改
 static Pid_Position_t chassis_follow_pid = NEW_POSITION_PID(0.5, 0, 0.05, 2000, 8600, 0, 1000, 500);  //底盘跟随PID
 
-static float chassis_motor_dynamic_rate = 10;
+#define CHASSIS_MOTOR_BASE_RATE 8.0f
 
 //函数声明
 static uint16_t Calc_Gyro_Speed_By_Power_Limit(uint16_t power_limit);
@@ -101,7 +104,7 @@ void Chassis_Task(void *pvParameters)
 		//遥控器模式
 		else if(chassis_robot_mode->control_device == 2)
 		{
-			switch(chassis_robot_mode->motion_mode)
+			switch(chassis_robot_mode->rc_motion_mode)
 			{
 				//底盘跟随
 				case 1:
@@ -114,10 +117,10 @@ void Chassis_Task(void *pvParameters)
 					motor_speed[2] = -remoter_control->rc.ch2 + remoter_control->rc.ch3 + follow_pid_output + remoter_control->rc.ch0/16.0f;
 					motor_speed[3] = -remoter_control->rc.ch2 - remoter_control->rc.ch3 + follow_pid_output + remoter_control->rc.ch0/16.0f;
 					
-					motor_speed[0] *= 11;
-					motor_speed[1] *= 11;
-					motor_speed[2] *= 11;
-					motor_speed[3] *= 11;
+					motor_speed[0] *= 12;
+					motor_speed[1] *= 12;
+					motor_speed[2] *= 12;
+					motor_speed[3] *= 12;
 					
 					break;
 				}
@@ -140,9 +143,8 @@ void Chassis_Task(void *pvParameters)
 					Calc_Gyro_Motors_Speed(motor_speed, \
 					0, \
 					GM6020_YAW_Angle_To_360(yaw_motor->mechanical_angle), \
-					remoter_control->rc.ch3 * 9, \
-					remoter_control->rc.ch2 * 9);
-
+					remoter_control->rc.ch3 * 10, \
+					remoter_control->rc.ch2 * 10);
 					break;
 				}
 				
@@ -162,7 +164,7 @@ void Chassis_Task(void *pvParameters)
 			motor_speed[2] = 0;
 			motor_speed[3] = 0;
 		#endif
-
+		
 		//底盘电机速度设置
 		Set_Chassis_Motors_Speed(motor_speed[0], motor_speed[1], motor_speed[2], motor_speed[3]);
 		
@@ -171,6 +173,18 @@ void Chassis_Task(void *pvParameters)
 	}
 	
 	//vTaskDelete(NULL);
+}
+
+//半秒加速，mode为1或-1，max_rate>1
+void Change_Chassis_Motor_Boost_Rate(int8_t mode, float max_rate)
+{
+	if(mode == 0)
+	{
+		chassis_motor_boost_rate = 1.0f;
+		return;
+	}
+	chassis_motor_boost_rate += (max_rate-1.0f) / 35 * ((float)mode);
+	Float_Constrain(&chassis_motor_boost_rate, 1.0f, max_rate);
 }
 
 //通过功率计算小陀螺时各个电机（M3508）的速度
@@ -197,7 +211,7 @@ static uint16_t Calc_Gyro_Speed_By_Power_Limit(uint16_t power_limit)
  * YAW_INIT_ANGLE宏定义是将云台的头和底盘的头对其，读出的GM6020机械角度
  * 依赖局部变量chassis_follow_pid，YAW_INIT_ANGLE宏定义数值，yaw轴云台当前机械角值
 */
-#define YAW_INIT_ANGLE 2735
+#define YAW_INIT_ANGLE YAW_GM6020_HEAD_ANGLE
 static float Calc_Chassis_Follow(void)
 {
 	float follow_tar = YAW_INIT_ANGLE;
@@ -256,33 +270,4 @@ static void Calc_Gyro_Motors_Speed(int16_t* motors_speed, int16_t rotate_speed, 
 	
 }
 
-/*
-static void Change_Chassis_Motor_Dynamic_Rate(void)
-{
-	if(Get_Module_Online_State(6)) //电容在线
-	{
-		if(super_capacitor->cap_voltage > 20.0f)
-		{
-			chassis_motor_dynamic_rate = 13;
-			return;
-		}
 
-		else if(super_capacitor->cap_voltage < 20.0f && super_capacitor->cap_voltage > 12.0f)
-		{
-			//chassis_motor_dynamic_rate = 13.0f - (20.0f - super_capacitor->cap_voltage)*0.5f; //可化简
-			chassis_motor_dynamic_rate = 3.0f + super_capacitor->cap_voltage*0.5f; //可化简
-			return;
-		}
-
-		else
-		{
-			chassis_motor_dynamic_rate = 8.8f;
-		}
-
-	}
-	else
-	{
-		chassis_motor_dynamic_rate = 11;
-	}
-}
-*/

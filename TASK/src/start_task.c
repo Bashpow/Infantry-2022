@@ -65,7 +65,7 @@ void Start_Task(void *pvParameters)
 							(const char*    )"gimbal_task",
 							(uint16_t       )256,
 							(void*          )NULL,
-							(UBaseType_t    )0,
+							(UBaseType_t    )20,
 							(TaskHandle_t*  )&GimbalTask_Handler);
 							
 	//创建发射机构任务

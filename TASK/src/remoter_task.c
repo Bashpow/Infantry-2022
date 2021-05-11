@@ -61,8 +61,7 @@ void Remoter_Task(void *pvParameters)
 		robot_mode.mouse_key_gimbal_mode=1; //1手动 2自瞄 3特殊
 		robot_mode.fric_cover_mode=0; //摩擦轮模式 0关闭 1慢速 2快速 3开舱盖
 		robot_mode.shoot_mode=1; //射击模式 1单发 2三连发 3连发速度一 4连发速度二
-		robot_mode.motion_mode=5; //1底盘跟随 2小陀螺 3自瞄跟随 4自瞄小陀螺 5特殊
-		robot_mode.shoot_key=0; //射击开关 1单发 2三连发 3连发速度一 4连发速度二
+		robot_mode.rc_motion_mode=5; //1底盘跟随 2小陀螺 3自瞄跟随 4自瞄小陀螺 5特殊
 	}
 	
 	vTaskDelay(200);
@@ -136,17 +135,6 @@ void Rc_Data_Update(void)
 	portYIELD_FROM_ISR(pxHigherPriorityTaskWoken);
 }
 
-/*
-  函数名：Clear_Shoot_Key
-	描述  ：在必要时清除射击按钮值
-  参数  ：无
-  返回值：无
-*/
-void Clear_Shoot_Key(void)
-{
-	robot_mode.shoot_key = 0;
-}
-
 void Fric_Reset(void)
 {
 	robot_mode.fric_cover_mode = 0;
@@ -188,9 +176,9 @@ static void Robot_Rc_Mode_Change_Control(void)
 	/* 底盘云台模式 */
 	if(S2_CHANGED_TO(3,1))
 	{
-		robot_mode.motion_mode++;
-		if(robot_mode.motion_mode==6) robot_mode.motion_mode=1;
-		Set_Beep_Time(robot_mode.motion_mode, 1200, 50);
+		robot_mode.rc_motion_mode++;
+		if(robot_mode.rc_motion_mode==6) robot_mode.rc_motion_mode=1;
+		Set_Beep_Time(robot_mode.rc_motion_mode, 1200, 50);
 	}
 
 	if(robot_mode.control_device != 2)
@@ -302,8 +290,6 @@ void Switch_Mouse_Key_Change(Rc_ctrl_t* rc, Rc_ctrl_t* last_rc, Robot_mode_t* ro
 /* 响应射击模式 */
 static void Shoot_Key_Control(void)
 {
-	static u8 mouse_first_press = 1;
-
 	//遥控器模式
 	if(robot_mode.control_device == 2)
 	{
@@ -312,53 +298,44 @@ static void Shoot_Key_Control(void)
 		{
 			if (last_time_rc.rc.ch4 < 120 && remote_controller.rc.ch4 > 120)
 			{
-				robot_mode.shoot_key = robot_mode.shoot_mode;
+				Set_Shoot_key(robot_mode.shoot_mode);
 			}
 		}
 		else
 		{
 			if (remote_controller.rc.ch4 > 120)
 			{
-				robot_mode.shoot_key = robot_mode.shoot_mode;
+				Set_Shoot_key(robot_mode.shoot_mode);
 			}
 			else
 			{
-				robot_mode.shoot_key = 0;
+				Set_Shoot_key(0);
 			}
 		}
 	}
 	
 	//键盘模式
-	else
+	else if(robot_mode.control_device == 1)
 	{
 		if( Is_Id1_17mm_Excess_Heat(judge_data) == 0 )  //判断是否超热量
 		{
 			if(remote_controller.mouse.press_l)
 			{
-				if(mouse_first_press)
-				{
-					First_Shoot_Friction_Speed_Subtract(2);
-					mouse_first_press = 0;
-				}
-				robot_mode.shoot_mode = 3;
-				robot_mode.shoot_key = 3;
+				Set_Shoot_key(3);
 			}
 			else
 			{
-				mouse_first_press = 1;
-				robot_mode.shoot_key = 0;
+				Set_Shoot_key(0);
 			}
 
 			if( remote_controller.mouse.press_r && (!last_time_rc.mouse.press_r) )
 			{
-				First_Shoot_Friction_Speed_Subtract(2);
-				robot_mode.shoot_mode = 2;
-				robot_mode.shoot_key = 2;
+				Set_Shoot_key(2);
 			}
 		}
 		else
 		{
-			robot_mode.shoot_key = 0;
+			Set_Shoot_key(0);
 		}
 
 	}

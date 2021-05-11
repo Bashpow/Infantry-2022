@@ -30,8 +30,8 @@
 
 #define RC_KEY               rc->key.value
 #define KEY_PRESSED(key)     (RC_KEY & key)
-#define VIRTUAL_ROCKER_STEP1 5
-#define VIRTUAL_ROCKER_STEP2 10
+#define VIRTUAL_ROCKER_STEP1 10
+#define VIRTUAL_ROCKER_STEP2 5
 
 /*
   º¯ÊýÃû£ºDMA2_Stream2_IRQHandler
