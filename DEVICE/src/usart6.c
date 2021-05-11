@@ -70,7 +70,6 @@ void Usart6_Init(void)
 
 void DMA2_Stream1_IRQHandler(void)
 {
-	//printf("get_data\r\n");
 	if (DMA_GetITStatus(DMA2_Stream1, DMA_IT_TCIF1))
 	{
 		DMA_ClearITPendingBit(DMA2_Stream1, DMA_IT_TCIF1);
