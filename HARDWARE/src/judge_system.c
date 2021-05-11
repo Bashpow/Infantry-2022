@@ -4,6 +4,7 @@
 #include "remoter_task.h"
 #include "shooter_task.h"
 #include "power_output.h"
+#include "detect_task.h"
 
 /* 裁判系统调试宏定义 */
 #if 0
@@ -19,6 +20,8 @@
 #else
 	#define JUDGE_ARRAY(name, data, len)
 #endif
+
+#define DATA_LEN_CHECK(datalen, correct_len, err)  if(data_len != correct_len){JUDGE_ERROR(err); return 0;}
 
 //函数声明
 void Find_All_A5(u8 *get_data, u16 data_len, u8 *r_position, u8 *r_a5_length);
@@ -78,7 +81,7 @@ uint8_t Analysis_Judge_System(u8 *get_data, u16 data_len)
 			continue;
 		}
 		
-//		DEBUG_PRINT("x%d len:%d p:%d id:%d\r\n", i, data_length[i], a5_position[i], Analysis_Cmd_Id( &get_data[ (a5_position[i]) ] ) );
+		// DEBUG_PRINT("x%d len:%d p:%d id:%d\r\n", i, data_length[i], a5_position[i], Analysis_Cmd_Id( &get_data[ (a5_position[i]) ] ) );
 		
 		
 	}
@@ -181,12 +184,12 @@ uint8_t Analysis_Data(u8 *get_data, uint16_t data_len)
 	
 	switch (cmd_id)
 	{
-		//实时热量数据
+		//实时功率热量数据
 		case Power_Heat_Data:
 			return Analysis_Power_Heat_Data(&get_data[7], data_len);
 			//break;
 		
-		//实时功率热量数据
+		//实时射击信息
 		case Shoot_Data:
 			return Analysis_Shoot_Data(&get_data[7], data_len);
 			//break;
@@ -204,17 +207,13 @@ uint8_t Analysis_Data(u8 *get_data, uint16_t data_len)
 //解析实时功率热量数据
 static uint8_t Analysis_Power_Heat_Data(u8 *data_package, uint16_t data_len)
 {
-	if(data_len != 16)
-	{
-		JUDGE_ERROR(503);
-		return 0;
-	}
+	DATA_LEN_CHECK(data_len, 16, 503);
 	
 	judge_data.power_heat_data.chassis_power = Hex4_To_Float1(&data_package[4]);
 	judge_data.power_heat_data.chassis_power_buffer = U8_Array_To_U16(&data_package[8]);
 	judge_data.power_heat_data.shooter_id1_17mm_cooling_heat = U8_Array_To_U16(&data_package[10]);
 	
-	//DEBUG_SHOWDATA2("chassis_power", judge_data.power_heat_data.chassis_power);
+	// DEBUG_SHOWDATA2("chassis_power", judge_data.power_heat_data.chassis_power);
 
 	return 1;
 }
@@ -222,16 +221,7 @@ static uint8_t Analysis_Power_Heat_Data(u8 *data_package, uint16_t data_len)
 //解析实时射击信息
 static uint8_t Analysis_Shoot_Data(u8 *data_package, uint16_t data_len)
 {
-	if(data_len != 7)
-	{
-		JUDGE_ERROR(504);
-		return 0;
-	}
-	
-	// judge_data.shoot_data.bullet_type = data_package[0];
-	// judge_data.shoot_data.shooter_id = data_package[1];
-	// judge_data.shoot_data.bullet_freq = data_package[2];
-	// judge_data.shoot_data.bullet_speed = Hex4_To_Float1(&data_package[3]);
+	DATA_LEN_CHECK(data_len, 7, 504);
 	
 	memcpy(&judge_data.shoot_data, data_package, 7);
 	Shooter_Friction_Speed_Limit();
@@ -243,11 +233,7 @@ static uint8_t Analysis_Shoot_Data(u8 *data_package, uint16_t data_len)
 //解析比赛机器人状态
 static uint8_t Analysis_Game_Robot_Status(u8 *data_package, uint16_t data_len)
 {
-	if(data_len != 27)
-	{
-		JUDGE_ERROR(505);
-		return 0;
-	}
+	DATA_LEN_CHECK(data_len, 27, 505);
 	
 	judge_data.game_robot_status.robot_id = data_package[0];
 
@@ -287,12 +273,11 @@ static uint8_t Analysis_Game_Robot_Status(u8 *data_package, uint16_t data_len)
 //判断1号17mm发射机构是否超热量
 u8 Is_Id1_17mm_Excess_Heat(const Judge_data_t* judge_data)
 {
-	//DEBUG_PRINT("sx:%d, dqrl:%d \r\n", judge_data->game_robot_status.shooter_id1_17mm_cooling_limit, judge_data->power_heat_data.shooter_id1_17mm_cooling_heat);
-	if(judge_data->game_robot_status.shooter_id1_17mm_cooling_limit == 65535)
+	if(judge_data->game_robot_status.shooter_id1_17mm_cooling_limit == 65535 || Get_Module_Online_State(5) == 0)
 	{
 		return 0;
 	}
-	if(judge_data->game_robot_status.shooter_id1_17mm_cooling_limit <= (judge_data->power_heat_data.shooter_id1_17mm_cooling_heat + 15 ))
+	if(judge_data->game_robot_status.shooter_id1_17mm_cooling_limit <= (judge_data->power_heat_data.shooter_id1_17mm_cooling_heat + 12 ))
 	{
 		return 1;
 	}
