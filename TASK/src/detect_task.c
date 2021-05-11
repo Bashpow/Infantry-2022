@@ -9,10 +9,6 @@
 #define MODULE_REONLINE(index) (module_status[index].time_out_flag==0 && module_status[index].old_time_out_flag==1)
 #define MODULE_OFFLINE(index)  (module_status[index].time_out_flag==1 && module_status[index].old_time_out_flag==0)
 
-#include "remoter_task.h"
-
-extern u16 rc_cnt;
-
 enum errorList
 {
 	remote_control = 0u, //遥控器
@@ -26,18 +22,19 @@ enum errorList
 };
 
 TaskHandle_t DetectTask_Handler;
+static Module_status_t module_status[8];
+static const Judge_data_t *judge_data;
+static const Super_capacitor_t *super_capacitor_data;
 
 static void Detect_Task_Init(void);
 
-static Module_status_t module_status[8];
-static const Judge_data_t *judge_data;
-
 void Detect_Task(void *pvParameters)
 {
+	Detect_Task_Init();
+
 	u8 cap_send_cnt = 0;
 	judge_data = Get_Judge_Data();
-	
-	Detect_Task_Init();
+	super_capacitor_data = Get_Super_Capacitor();
 
 	vTaskDelay(800);
 	
@@ -63,13 +60,23 @@ void Detect_Task(void *pvParameters)
 		}
 		
 		/* 功率限制 */
-		if(module_status[chassis_motor].time_out_flag==0 && module_status[judge_system].time_out_flag==0 && module_status[super_capacitor].time_out_flag==0)  //判断底盘、裁判系统、底盘是否同时上线
+		if(module_status[judge_system].time_out_flag==0 && module_status[super_capacitor].time_out_flag==0)  //判断裁判系统、底盘是否同时上线
 		{
+			//TODO
+			//判断超级电容目标功率与裁判系统限制功率-2是否相符，否设置超级电容
+			// if((judge_data->game_robot_status.chassis_power_limit - 2) != ((uint16_t)(super_capacitor_data->target_power)))
+			// {
+			// 	Set_Super_Capacitor( (judge_data->game_robot_status.chassis_power_limit-2) * 100);
+			// 	DEBUG_LOG("Set Super Cap%d", (judge_data->game_robot_status.chassis_power_limit-2));
+			// }
+			//TODO
+			//设置完成之后停止检测一段时间
+
 			cap_send_cnt++;
 			if(cap_send_cnt == 4)
 			{
 				cap_send_cnt = 0;
-				//DEBUG_SHOWDATA1("gglgl", judge_data->game_robot_status.chassis_power_limit);  //打印限制功率
+				// DEBUG_SHOWDATA1("gglgl", judge_data->game_robot_status.chassis_power_limit);  //打印限制功率
 				//设置功率比限制功率小2W
 				Set_Super_Capacitor( (judge_data->game_robot_status.chassis_power_limit-2) * 100);
 			}
