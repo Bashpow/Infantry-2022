@@ -36,19 +36,20 @@ void Usart3_Init(void)
 	USART_InitTypeDef USART_InitStructure;
 	NVIC_InitTypeDef  NVIC_InitStructure;
 	DMA_InitTypeDef   DMA_InitStructure;
-
+	
 	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_GPIOD,ENABLE);
 	RCC_APB1PeriphClockCmd(RCC_APB1Periph_USART3,ENABLE);
- 
+	RCC_AHB1PeriphClockCmd(RCC_AHB1Periph_DMA1,ENABLE);
+
 	GPIO_PinAFConfig(GPIOD,GPIO_PinSource8,GPIO_AF_USART3);
 	GPIO_PinAFConfig(GPIOD,GPIO_PinSource9,GPIO_AF_USART3);
 
 	GPIO_InitStructure.GPIO_Pin = GPIO_Pin_8 | GPIO_Pin_9;
 	GPIO_InitStructure.GPIO_Mode = GPIO_Mode_AF;
-	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_50MHz;
+	GPIO_InitStructure.GPIO_Speed = GPIO_Speed_100MHz;
 	GPIO_InitStructure.GPIO_OType = GPIO_OType_PP;
 	GPIO_InitStructure.GPIO_PuPd = GPIO_PuPd_UP;
-	GPIO_Init(GPIOD,&GPIO_InitStructure);
+	GPIO_Init(GPIOD, &GPIO_InitStructure);
 
 	USART_InitStructure.USART_BaudRate = 115200;
 	USART_InitStructure.USART_WordLength = USART_WordLength_8b;
@@ -57,8 +58,6 @@ void Usart3_Init(void)
 	USART_InitStructure.USART_HardwareFlowControl = USART_HardwareFlowControl_None;
 	USART_InitStructure.USART_Mode = USART_Mode_Rx | USART_Mode_Tx;
 	USART_Init(USART3, &USART_InitStructure);
-	
-	USART_Cmd(USART3, ENABLE);
 	
 	NVIC_InitStructure.NVIC_IRQChannel = USART3_IRQn;
 	NVIC_InitStructure.NVIC_IRQChannelPreemptionPriority = 12;
@@ -69,6 +68,7 @@ void Usart3_Init(void)
 	//串口8空闲中断（一帧数据接收完毕）
 	USART_ITConfig(USART3, USART_IT_IDLE, DISABLE);
 	USART_DMACmd(USART3, USART_DMAReq_Rx, ENABLE);
+	USART_Cmd(USART3, ENABLE);
 
 	/* DMA1流1 （串口3接收） */
 	DMA_DeInit(DMA1_Stream1);
@@ -83,7 +83,7 @@ void Usart3_Init(void)
 	DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_Byte;
 	DMA_InitStructure.DMA_MemoryDataSize = DMA_MemoryDataSize_Byte;
 	DMA_InitStructure.DMA_Mode = DMA_Mode_Circular;
-	DMA_InitStructure.DMA_Priority = DMA_Priority_VeryHigh;
+	DMA_InitStructure.DMA_Priority = DMA_Priority_High;
 	DMA_InitStructure.DMA_FIFOMode = DMA_FIFOMode_Disable;
 	DMA_InitStructure.DMA_FIFOThreshold = DMA_FIFOThreshold_1QuarterFull;
 	DMA_InitStructure.DMA_MemoryBurst = DMA_Mode_Normal;
@@ -107,7 +107,6 @@ void USART3_IRQHandler(void)
 		
 		//计算接收到的数据长度
 		usart3_rx_length = 128 - DMA_GetCurrDataCounter(DMA1_Stream1);
-		usart3_rx_buf[usart3_rx_length] = '\0';
 
 		//重设传输长度
 		DMA_SetCurrDataCounter(DMA1_Stream1, 128);
@@ -116,7 +115,7 @@ void USART3_IRQHandler(void)
 		Shell_Get_Data();
 		
 		//开启DMA
-		DMA_Cmd(DMA1_Stream1,ENABLE);
+		DMA_Cmd(DMA1_Stream1, ENABLE);
 		
 	}
 }
