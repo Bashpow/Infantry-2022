@@ -2,8 +2,6 @@
 #include "shellio.h"
 #include "user_commands.h"
 
-//参考自 https://gitee.com/somebug/atomlib/blob/master/shell.c
-
 union cmd_id
 {
     struct
@@ -120,7 +118,7 @@ void Shell_Command_Parse(char * arg)
   * @note     运行过后字符串缓冲区内容将被修改
   * @param    str    : 命令字符串后面所跟参数缓冲区指针
   * @param    argv   : 数据转换后缓存地址
-  * @param    maxread: 最大读取数
+  * @param    maxread: 最大读取数（一般为argv的个数）
   * @return   最终读取参数个数输出
 */
 int Shell_Split_String(char * str ,char ** argv ,int maxread)
@@ -177,7 +175,7 @@ static void Shell_List_Cmd(char * arg)
 
 /**
   * @author   Bashpow
-  * @brief    shell 初始化,注册几条基本的命令。不建议不初始化。
+  * @brief    shell 初始化,注册几条基本的命令，注册用户命令。不建议不初始化。
   * @return   无
 */
 void Shell_Init(void)
