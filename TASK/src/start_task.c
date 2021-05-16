@@ -4,6 +4,7 @@
 #include "buzzer_task.h"
 #include "remoter_task.h"
 #include "wt61c_task.h"
+#include "cansend_task.h"
 #include "chassis_task.h"
 #include "gimbal_task.h"
 #include "shooter_task.h"
@@ -32,7 +33,7 @@ void Start_Task(void *pvParameters)
 							(const char*    )"remoter_task",
 							(uint16_t       )256,
 							(void*          )NULL,
-							(UBaseType_t    )15,
+							(UBaseType_t    )16,
 							(TaskHandle_t*  )&RemoterTask_Handler);
 	
 	//创建陀螺仪取任务
@@ -40,7 +41,7 @@ void Start_Task(void *pvParameters)
 							(const char*    )"wt61c_task",
 							(uint16_t       )256,
 							(void*          )NULL,
-							(UBaseType_t    )10,
+							(UBaseType_t    )15,
 							(TaskHandle_t*  )&Wt61cTask_Handler);
 	
 	//创建蜂鸣器任务
@@ -51,6 +52,13 @@ void Start_Task(void *pvParameters)
 							(UBaseType_t    )3,
 							(TaskHandle_t*  )&BuzzerTask_Handler);
 
+	//创建Can发送任务
+	xTaskCreate((TaskFunction_t )Cansend_Task,
+							(const char*    )"cansend_task",
+							(uint16_t       )128,
+							(void*          )NULL,
+							(UBaseType_t    )25,
+							(TaskHandle_t*  )&CansendTask_Handler);
 						
 	//创建底盘任务
 	xTaskCreate((TaskFunction_t )Chassis_Task,
@@ -97,7 +105,7 @@ void Start_Task(void *pvParameters)
 							(const char*    )"detect_task",   
 							(uint16_t       )256,
 							(void*          )NULL,
-							(UBaseType_t    )5,
+							(UBaseType_t    )6,
 							(TaskHandle_t*  )&DetectTask_Handler);
 
 	//创建Shell任务
@@ -114,7 +122,7 @@ void Start_Task(void *pvParameters)
 								(const char*    )"CPU_Task",/* 任务名字 */
 								(uint16_t       )512,   /* 任务栈大小 */
 								(void*          )NULL,	/* 任务入口函数参数 */
-								(UBaseType_t    )25,	    /* 任务的优先级 */
+								(UBaseType_t    )28,	    /* 任务的优先级 */
 								(TaskHandle_t*  )&CPU_Task_Handle);/* 任务控制块指针 */
 	#endif
 

@@ -41,8 +41,6 @@ void Usart8_Init(void)
 	NVIC_InitStructure.NVIC_IRQChannelCmd = ENABLE;	
 	NVIC_Init(&NVIC_InitStructure);
 
-	USART_Init(UART8, &USART_InitStructure);
-
 	//串口8空闲中断（一帧数据接收完毕）
 	USART_ITConfig(UART8, USART_IT_IDLE, DISABLE);
 

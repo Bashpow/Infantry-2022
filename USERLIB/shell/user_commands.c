@@ -4,7 +4,6 @@
 extern Shell_command_t shell_cmd_root;
 
 //用户头文件包含
-#include "FreeRTOS.h"
 #include "math2.h"
 #include "detect_task.h"
 #include "can1_motor.h"

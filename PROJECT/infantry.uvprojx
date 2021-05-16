@@ -1010,6 +1010,11 @@
               <FilePath>..\TASK\src\wt61c_task.c</FilePath>
             </File>
             <File>
+              <FileName>cansend_task.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\TASK\src\cansend_task.c</FilePath>
+            </File>
+            <File>
               <FileName>chassis_task.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\TASK\src\chassis_task.c</FilePath>

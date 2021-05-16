@@ -141,8 +141,6 @@ void Gimbal_Task(void *pvParameters)
 						Calc_Pitch_Angle8191_Pid(pitch_angle_set) );
 
 					break;
-					
-					;
 				}
 				
 				//×ÔÃéÄ£Ê½

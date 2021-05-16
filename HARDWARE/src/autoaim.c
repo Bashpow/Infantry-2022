@@ -58,8 +58,5 @@ void Auto_Aim_Calc(void)
 	{
 		auto_aim_msg.identifie_ready = 0;
 	}
-
-//	 DEBUG_PRINT("r:%d  x:%d  y:%d\r\n", auto_aim_msg.identifie_ready, auto_aim_msg.x_yaw, auto_aim_msg.y_pitch);
-
 }
 

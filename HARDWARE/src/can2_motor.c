@@ -4,7 +4,7 @@
 #include "pid.h"
 #include "math2.h"
 #include "detect_task.h"
- 
+#include "cansend_task.h"
 
 /* 定义变量 */
 static Motor_measure_t shooter_wave_motor; //波轮电机数据
@@ -48,20 +48,9 @@ void CAN2_RX0_IRQHandler(void)
 }
 
 //计算发射机构波轮电机速度PID，并输出
-/*
 void Set_Shooter_Wave_Motors_Speed(float wave_wheel)
 {
-	Can2_Send_4Msg(CAN_SHOOTER_ALL_ID,\
-	               Pid_Position_Calc(&motor_wave_speed_pid, wave_wheel, shooter_wave_motor.speed_rpm),\
-	               0,\
-	               0,\
-	               0);
-}
-*/
-void Set_Shooter_Wave_Motors_Speed(float wave_wheel)
-{
-	// DEBUG_PRINT("%.1f,%d\r\n", wave_wheel, shooter_wave_motor.speed_rpm);
-	Can2_Send_4Msg(CAN_SHOOTER_ALL_ID,\
+	Can_Send(2, CAN_SHOOTER_ALL_ID,\
 	               Pid_Position_Calc(&motor_wave_speed_pid, wave_wheel, shooter_wave_motor.speed_rpm),\
 	               0,\
 	               0,\
@@ -77,20 +66,15 @@ const Motor_measure_t *Get_Gimbal_Motor(void)
 //计算速度PID，并输出给电机
 void Set_Gimbal_Motors_Speed(float speed_yaw, float speed_pitch)
 {
-	static uint8_t fre=0;
+	//taskENTER_CRITICAL();           //进入临界区
 	float aaa = Pid_Position_Calc(&motor_yaw_speed_pid, speed_yaw, gimbal_motor[0].speed_rpm);
-	Can2_Send_4Msg(CAN_GIMBAL_ALL_ID,\
+	Can_Send(2, CAN_GIMBAL_ALL_ID,\
 	               aaa,\
 	               Pid_Position_Calc(&motor_pitch_speed_pid, speed_pitch, gimbal_motor[1].speed_rpm),\
 	               0,\
 				   0);
-	//printf("%.1f,%d\r\n", motor_pitch_speed_pid.output,(gimbal_motor+1)->mechanical_angle);
-	fre++;
-	//if(fre == 100)
-	{
-	 // fre = 0;	
-	  //printf("%.1f, %d, %.1f, %.1f, %.1f, %.1f\r\n",speed_yaw, gimbal_motor->speed_rpm, motor_yaw_speed_pid.p_out,motor_yaw_speed_pid.i_out,motor_yaw_speed_pid.d_out,motor_yaw_speed_pid.output);
-	}
+				   //printf("%.1f\r\n",aaa);
+				   //taskEXIT_CRITICAL(); //退出临界区
 }
 
 //计算YAW轴PID，角度格式为0~360

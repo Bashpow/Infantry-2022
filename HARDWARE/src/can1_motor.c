@@ -5,6 +5,7 @@
 #include "detect_task.h"
 #include "can1.h"
 #include "pid.h"
+#include "cansend_task.h"
 
 /* ------------------重要说明--------------------- */
 //CAN1连接了地盘4个电机，和超级电容
@@ -62,7 +63,7 @@ const Super_capacitor_t *Get_Super_Capacitor(void)
 //计算底盘4个电机速度PID，并输出
 void Set_Chassis_Motors_Speed(float speed_fl, float speed_fr, float speed_bl, float speed_br)
 {
-	Can1_Send_4Msg(CAN_CHASSIS_ALL_ID,\
+	Can_Send(1, CAN_CHASSIS_ALL_ID,\
 	               Pid_Position_Calc(&motor_fl_speed_pid, speed_fl, chassis_motor[0].speed_rpm),\
 	               Pid_Position_Calc(&motor_fr_speed_pid, speed_fr, chassis_motor[1].speed_rpm),\
 	               Pid_Position_Calc(&motor_bl_speed_pid, speed_bl, chassis_motor[2].speed_rpm),\
@@ -73,14 +74,15 @@ void Set_Chassis_Motors_Speed(float speed_fl, float speed_fr, float speed_bl, fl
 //超级电容功率设置
 void Set_Super_Capacitor(uint16_t target_power)
 {
-	CanTxMsg TxMessage;
-	TxMessage.StdId = SUPER_CAPACITOR_SEND_ID;
-	TxMessage.IDE = CAN_Id_Standard;
-	TxMessage.RTR = CAN_RTR_Data;
-	TxMessage.DLC = 0x08;
-	TxMessage.Data[0] = target_power >> 8;
-	TxMessage.Data[1] = target_power;
-	CAN_Transmit(CAN1, &TxMessage);
+	// CanTxMsg TxMessage;
+	// TxMessage.StdId = SUPER_CAPACITOR_SEND_ID;
+	// TxMessage.IDE = CAN_Id_Standard;
+	// TxMessage.RTR = CAN_RTR_Data;
+	// TxMessage.DLC = 0x08;
+	// TxMessage.Data[0] = target_power >> 8;
+	// TxMessage.Data[1] = target_power;
+	// CAN_Transmit(CAN1, &TxMessage);
+	Can_Send(1, SUPER_CAPACITOR_SEND_ID, target_power, 0, 0, 0);
 }
 
 //超级电容数据处理

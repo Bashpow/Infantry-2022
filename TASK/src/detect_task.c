@@ -32,7 +32,7 @@ void Detect_Task(void *pvParameters)
 {
 	Detect_Task_Init();
 
-	u8 cap_send_cnt = 0;
+	u8 cap_send_cnt = 5;
 	judge_data = Get_Judge_Data();
 	super_capacitor_data = Get_Super_Capacitor();
 
@@ -59,27 +59,23 @@ void Detect_Task(void *pvParameters)
 			
 		}
 		
-		/* 功率限制 */
-		if(module_status[judge_system].time_out_flag==0 && module_status[super_capacitor].time_out_flag==0)  //判断裁判系统、底盘是否同时上线
+		//底盘功率设置
+		if(cap_send_cnt > 2)
 		{
-			//TODO
-			//判断超级电容目标功率与裁判系统限制功率-2是否相符，否设置超级电容
-			// if((judge_data->game_robot_status.chassis_power_limit - 2) != ((uint16_t)(super_capacitor_data->target_power)))
-			// {
-			// 	Set_Super_Capacitor( (judge_data->game_robot_status.chassis_power_limit-2) * 100);
-			// 	DEBUG_LOG("Set Super Cap%d", (judge_data->game_robot_status.chassis_power_limit-2));
-			// }
-			//TODO
-			//设置完成之后停止检测一段时间
-
-			cap_send_cnt++;
-			if(cap_send_cnt == 4)
+			/* 功率限制 */
+			if(module_status[judge_system].time_out_flag==0 && module_status[super_capacitor].time_out_flag==0)  //判断裁判系统、底盘是否同时上线
 			{
-				cap_send_cnt = 0;
-				// DEBUG_SHOWDATA1("gglgl", judge_data->game_robot_status.chassis_power_limit);  //打印限制功率
-				//设置功率比限制功率小2W
-				Set_Super_Capacitor( (judge_data->game_robot_status.chassis_power_limit-2) * 100);
+				//判断超级电容目标功率与裁判系统限制功率-2是否相符，否设置超级电容
+				if((judge_data->game_robot_status.chassis_power_limit - 2) != ((uint16_t)(super_capacitor_data->target_power)))
+				{
+					Set_Super_Capacitor( (judge_data->game_robot_status.chassis_power_limit-2) * 100);
+					cap_send_cnt = 0;
+				}
 			}
+		}
+		else
+		{
+			cap_send_cnt++;
 		}
 		
 		LED_GREEN_TOGGLE;

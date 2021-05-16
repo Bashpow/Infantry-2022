@@ -5,6 +5,7 @@
 #include "usart3.h"
 #include "judge_system.h"
 #include "buzzer_task.h"
+#include "chassis_task.h"
 #include "shooter_task.h"
 #include "detect_task.h"
 
@@ -26,7 +27,7 @@
 /* 函数声明 */
 static void Robot_Rc_Mode_Change_Control(void);
 static void Shoot_Key_Control(void);
-void Switch_Mouse_Key_Change(Rc_ctrl_t* rc, Rc_ctrl_t* last_rc, Robot_mode_t* robot_mode);
+static void Switch_Mouse_Key_Change(Rc_ctrl_t* rc, Rc_ctrl_t* last_rc, Robot_mode_t* robot_mode);
 
 /* 变量 */
 TaskHandle_t RemoterTask_Handler;
@@ -203,8 +204,10 @@ static void Robot_Rc_Mode_Change_Control(void)
 	}
 }
 
+
+
 /* 响应键盘切换模式 */
-void Switch_Mouse_Key_Change(Rc_ctrl_t* rc, Rc_ctrl_t* last_rc, Robot_mode_t* robot_mode)
+static void Switch_Mouse_Key_Change(Rc_ctrl_t* rc, Rc_ctrl_t* last_rc, Robot_mode_t* robot_mode)
 {
 	//判断是不是键鼠模式
 	if(robot_mode->control_device != 1)
@@ -212,29 +215,41 @@ void Switch_Mouse_Key_Change(Rc_ctrl_t* rc, Rc_ctrl_t* last_rc, Robot_mode_t* ro
 		return;
 	}
 
-	//底盘模式(按住shift开启小陀螺)
-	if( RC_KEY_PRESSED(KEY_VALUE,KEY_SHIFT) )
+	//按住shift底盘加速
+	if( RC_KEY_PRESSED(KEY_VALUE, KEY_SHIFT) )
 	{
-		robot_mode->mouse_key_chassis_mode = 2;
+		Change_Chassis_Motor_Boost_Rate(1, 2.0); //加速
 	}
 	else
 	{
-		if(robot_mode->mouse_key_chassis_mode != 3)
-			robot_mode->mouse_key_chassis_mode = 1;
+		Change_Chassis_Motor_Boost_Rate(-1, 2.0); //减速
 	}
 
-	//云台模式
+	//底盘模式(按下ctrl更改底盘模式1跟随模式2小陀螺模式)
 	if(KEY_CLICKED(KEY_CTRL))
+	{
+		if(robot_mode->mouse_key_chassis_mode == 1)
+		{
+			robot_mode->mouse_key_chassis_mode = 2;
+		}
+		else
+		{
+			robot_mode->mouse_key_chassis_mode = 1;
+		}
+	}
+
+	//云台模式 G (手动控制 自瞄模式)
+	if(KEY_CLICKED(KEY_G))
 	{
 		if(robot_mode->mouse_key_gimbal_mode == 1)
 		{
 			robot_mode->mouse_key_gimbal_mode = 2;
-			Set_Beep_Time(4, 1200, 50);
+			// Set_Beep_Time(4, 1200, 50);
 		}
 		else
 		{
 			robot_mode->mouse_key_gimbal_mode = 1;
-			Set_Beep_Time(3, 1200, 50);
+			// Set_Beep_Time(3, 1200, 50);
 		}
 	}
 
@@ -246,7 +261,7 @@ void Switch_Mouse_Key_Change(Rc_ctrl_t* rc, Rc_ctrl_t* last_rc, Robot_mode_t* ro
 		Set_Beep_Time(5, 1200, 50);
 	}
 
-	//特殊模式检查
+	//非特殊模式检查
 	if(robot_mode->mouse_key_chassis_mode == 3 && robot_mode->mouse_key_gimbal_mode != 3)
 	{
 		robot_mode->mouse_key_chassis_mode = 1;
@@ -256,8 +271,8 @@ void Switch_Mouse_Key_Change(Rc_ctrl_t* rc, Rc_ctrl_t* last_rc, Robot_mode_t* ro
 		robot_mode->mouse_key_gimbal_mode = 1;
 	}
 
-	//弹舱模式
-	if(KEY_CLICKED(KEY_Q))
+	//弹舱模式 R （开关弹舱盖）
+	if(KEY_CLICKED(KEY_R))
 	{
 		if(robot_mode->fric_cover_mode == 3)
 		{
@@ -271,7 +286,7 @@ void Switch_Mouse_Key_Change(Rc_ctrl_t* rc, Rc_ctrl_t* last_rc, Robot_mode_t* ro
 		}
 	}
 
-	//摩擦轮模式
+	//摩擦轮模式 E
 	if(KEY_CLICKED(KEY_E))
 	{
 		if(robot_mode->fric_cover_mode == 1)
