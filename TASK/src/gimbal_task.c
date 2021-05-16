@@ -26,6 +26,7 @@ static Pid_Increment_t  autoaim_pitch_pid1 = NEW_INCREMENT_PID(0.05, 0.02, 0, 30
 void Gimbal_Task(void *pvParameters)
 {
 	
+	float yaw_speed, pitch_speed;
 	wt61c_data = Get_Wt61c_Data(); //陀螺仪数据
 	remoter_control = Get_Remote_Control_Point();  //遥控器数据
 	chassis_robot_mode = Get_Robot_Mode_Point();  //机器人模式数据
@@ -56,9 +57,8 @@ void Gimbal_Task(void *pvParameters)
 					/* Pitach角度限制 */
 					Float_Constrain(&pitch_angle_set, PITCH_UP_LIMIT, PITCH_DOWN_LIMIT);
 
-					Set_Gimbal_Motors_Speed( \
-						Calc_Yaw_Angle360_Pid(yaw_angle_set, wt61c_data->angle.yaw_z), \
-						Calc_Pitch_Angle8191_Pid(pitch_angle_set) );
+					yaw_speed = Calc_Yaw_Angle360_Pid(yaw_angle_set, wt61c_data->angle.yaw_z);
+					pitch_speed = Calc_Pitch_Angle8191_Pid(pitch_angle_set);
 					
 					break;
 					
@@ -90,9 +90,8 @@ void Gimbal_Task(void *pvParameters)
 					/* Pitach角度限制 */
 					Float_Constrain(&pitch_angle_set, PITCH_UP_LIMIT, PITCH_DOWN_LIMIT);
 
-					Set_Gimbal_Motors_Speed( \
-						Calc_Yaw_Angle360_Pid(yaw_angle_set,wt61c_data->angle.yaw_z), \
-						Calc_Pitch_Angle8191_Pid(pitch_angle_set) );
+					yaw_speed = Calc_Yaw_Angle360_Pid(yaw_angle_set,wt61c_data->angle.yaw_z);
+					pitch_speed = Calc_Pitch_Angle8191_Pid(pitch_angle_set);
 
 					break;
 				}
@@ -105,9 +104,8 @@ void Gimbal_Task(void *pvParameters)
 					/* Pitach角度限制 */
 					Float_Constrain(&pitch_angle_set, PITCH_UP_LIMIT, PITCH_DOWN_LIMIT);
 
-					Set_Gimbal_Motors_Speed( \
-						(- remoter_control->mouse.x) / 2.8f, \
-						Calc_Pitch_Angle8191_Pid(pitch_angle_set) );
+					yaw_speed = (- remoter_control->mouse.x) / 2.8f;
+					pitch_speed = Calc_Pitch_Angle8191_Pid(pitch_angle_set);
 
 					break;
 				}
@@ -136,9 +134,8 @@ void Gimbal_Task(void *pvParameters)
 					/* Pitach角度限制 */
 					Float_Constrain(&pitch_angle_set, PITCH_UP_LIMIT, PITCH_DOWN_LIMIT);
 
-					Set_Gimbal_Motors_Speed( \
-						Calc_Yaw_Angle360_Pid(yaw_angle_set,wt61c_data->angle.yaw_z), \
-						Calc_Pitch_Angle8191_Pid(pitch_angle_set) );
+					yaw_speed = Calc_Yaw_Angle360_Pid(yaw_angle_set, wt61c_data->angle.yaw_z);
+					pitch_speed = Calc_Pitch_Angle8191_Pid(pitch_angle_set);
 
 					break;
 				}
@@ -168,9 +165,8 @@ void Gimbal_Task(void *pvParameters)
 					/* Pitach角度限制 */
 					Float_Constrain(&pitch_angle_set, PITCH_UP_LIMIT, PITCH_DOWN_LIMIT);
 
-					Set_Gimbal_Motors_Speed( \
-						Calc_Yaw_Angle360_Pid(yaw_angle_set,wt61c_data->angle.yaw_z), \
-						Calc_Pitch_Angle8191_Pid(pitch_angle_set) );
+					yaw_speed = Calc_Yaw_Angle360_Pid(yaw_angle_set, wt61c_data->angle.yaw_z);
+					pitch_speed = Calc_Pitch_Angle8191_Pid(pitch_angle_set);
 
 					break;
 				}
@@ -183,9 +179,8 @@ void Gimbal_Task(void *pvParameters)
 					/* Pitach角度限制 */
 					Float_Constrain(&pitch_angle_set, PITCH_UP_LIMIT, PITCH_DOWN_LIMIT);
 
-					Set_Gimbal_Motors_Speed( \
-						(- remoter_control->rc.ch0) / 20.0f, \
-						Calc_Pitch_Angle8191_Pid(pitch_angle_set) );
+					yaw_speed = (- remoter_control->rc.ch0) / 20.0f;
+					pitch_speed = Calc_Pitch_Angle8191_Pid(pitch_angle_set);
 
 					break;
 				}
@@ -194,6 +189,8 @@ void Gimbal_Task(void *pvParameters)
 			
 		}
 		
+		Set_Gimbal_Motors_Speed(yaw_speed, pitch_speed);
+
 		vTaskDelay(1);
 
 	}
