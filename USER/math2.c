@@ -111,18 +111,6 @@ float String_To_Float(char *array)
 	return ( f1 + f2 );
 }
 
-u8 Str_Compare(char * str1, char * str2, u16 len)
-{
-	for(u16 i=0; i<len; i++)
-	{
-		if(str1[i] != str2[i])
-		{
-			return 0;
-		}
-	}
-	return 1;
-}
-
 /* 角度Pid时，在获取tar和cur之后紧接着调用 */
 void Handle_Angle8191_PID_Over_Zero(float *tar, float *cur)
 {
@@ -133,10 +121,6 @@ void Handle_Angle8191_PID_Over_Zero(float *tar, float *cur)
 	else if(*tar - *cur < -4096)
 	{
 		*cur = *cur - 8192;
-	}
-	else
-	{
-		//pid->cur = cur;
 	}
 }
 
@@ -185,31 +169,4 @@ void Pitch_Angle_Limit(float* angle, float down_angle, float up_angle)
 		else if(*angle > up_angle) *angle = up_angle;
 	}
 		
-}
-
-float KalmenFilter(float data, float Q, float R)
-{
-  static float x_last;
-  float x_mid = x_last;
-  float x_now;
-
-  static double p_last;
-  double p_mid ;
-  double p_now;
-
-  double kg;
-
-  x_mid = x_last;                       //x_last=x(k-1|k-1),x_mid=x(k|k-1)
-  p_mid = p_last+Q;                     //p_mid=p(k|k-1),p_last=p(k-1|k-1),Q=噪声
-
-  /*
-   *  卡尔曼滤波的五个重要公式
-   */
-  kg = p_mid / (p_mid + R);                 //kg为kalman filter，R 为噪声
-  x_now = x_mid + kg * (data - x_mid); //估计出的最优值
-  p_now = (1 - kg) * p_mid;                 //最优值对应的covariance
-  p_last = p_now;                           //更新covariance 值
-  x_last = x_now;                           //更新系统状态值
-
-  return x_now;
 }
