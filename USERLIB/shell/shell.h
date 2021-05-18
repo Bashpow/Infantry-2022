@@ -16,10 +16,10 @@ typedef struct _shell_command
 
 //注册命令时调用此函数
 #define Shell_Register_Command(name, func) \
-do{ \
+{ \
 	static Shell_command_t new_cmd = {0}; \
 	_Shell_Register(&shell_cmd_root, &new_cmd, name, func); \
-}while(0)
+}
 
 void _Shell_Register(Shell_command_t * root, Shell_command_t * new_cmd, char * cmd_name, cmd_callback_func cmd_func);
 void Shell_Init(void);

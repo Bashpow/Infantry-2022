@@ -34,4 +34,6 @@
 #include "math2.h"
 #define shell_print printf
 
+unsigned char Str_Compare(char * str1, char * str2, unsigned short int len);
+
 #endif
