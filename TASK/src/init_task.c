@@ -28,7 +28,7 @@ void All_Init(void)
 	/* 初始化串口3 */
 	Usart3_Init();
 	Print_Logo_2_Com();
-	INFO_PRINT("\r\nHLL 2021 New Infantry %s\r\n", VERSION);
+	INFO_PRINT("HLL 2021 New Infantry %s\r\n\r\n\r\n", VERSION);
 
 	/* 初始化遥控器（串口1） */
 	Usart1_Init();
@@ -65,7 +65,7 @@ void All_Init(void)
 	/* Shell初始化 */
 	Shell_Init();
 
-	INFO_PRINT("\r\nAll peripheral init.\r\n");
+	INFO_LOG("All peripheral init.\r\n");
 	Led_Flow_On();
 }
 

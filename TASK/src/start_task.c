@@ -127,10 +127,11 @@ void Start_Task(void *pvParameters)
 	#endif
 
 	Led_Flow_Off();
-	INFO_LOG("\r\nAll tasks creat.\r\n");
-	INFO_LOG("\r\nSystem run.\r\n");
-	
+	INFO_LOG("All tasks creat.\r\n");
+
 	taskEXIT_CRITICAL(); //退出临界区
+	INFO_LOG("System run.\r\n\r\n");
+	
 	vTaskDelete(NULL);  //删除开始任务
 }
 
