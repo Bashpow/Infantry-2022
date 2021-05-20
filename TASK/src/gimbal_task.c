@@ -25,8 +25,7 @@ static Pid_Increment_t  autoaim_pitch_pid1 = NEW_INCREMENT_PID(0.05, 0.02, 0, 30
 
 void Gimbal_Task(void *pvParameters)
 {
-	
-	float yaw_speed, pitch_speed;
+	float yaw_speed, pitch_speed;  //云台电机速度
 	wt61c_data = Get_Wt61c_Data(); //陀螺仪数据
 	remoter_control = Get_Remote_Control_Point();  //遥控器数据
 	chassis_robot_mode = Get_Robot_Mode_Point();  //机器人模式数据
@@ -47,8 +46,6 @@ void Gimbal_Task(void *pvParameters)
 				{
 					yaw_angle_set -= (remoter_control->mouse.x) / 66.0f;
 					pitch_angle_set += (remoter_control->mouse.y) / 5.0f;
-
-					//DEBUG_PRINT("yaw:%.1f, pitch:%.1f\r\n", yaw_angle_set, pitch_angle_set);
 
 					//yaw角度回环
 					if(yaw_angle_set>360) yaw_angle_set -= 360;
@@ -174,7 +171,7 @@ void Gimbal_Task(void *pvParameters)
 				//特殊
 				case 5:
 				{
-					pitch_angle_set -= remoter_control->rc.ch1 / 20.0f;
+					pitch_angle_set -= remoter_control->rc.ch1 / 100.0f;
 
 					/* Pitach角度限制 */
 					Float_Constrain(&pitch_angle_set, PITCH_UP_LIMIT, PITCH_DOWN_LIMIT);
@@ -189,6 +186,7 @@ void Gimbal_Task(void *pvParameters)
 			
 		}
 		
+		Float_Constrain(&yaw_speed, -125, 125);  //yaw轴速度限制
 		Set_Gimbal_Motors_Speed(yaw_speed, pitch_speed);
 
 		vTaskDelay(1);
