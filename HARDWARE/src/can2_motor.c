@@ -10,10 +10,10 @@
 static Motor_measure_t shooter_wave_motor; //波轮电机数据
 static Motor_measure_t gimbal_motor[2]; //云台电机数据
 
-static Pid_Position_t motor_wave_speed_pid = NEW_POSITION_PID(4.2, 0, 0.1, 2000, 10000, 0, 1000, 500); //波轮速度PID
+static Pid_Position_t motor_wave_speed_pid = NEW_POSITION_PID(10.8, 0.8, 1.0, 2000, 10000, 0, 1000, 500); //波轮速度PID
 
-static Pid_Position_t motor_yaw_speed_pid = NEW_POSITION_PID(600, 110, 74, 5000, 29999, 0, 1000, 500); //yaw电机速度PID
-static Pid_Position_t motor_yaw_angle_pid = NEW_POSITION_PID(0.6, 0, 15, 100, 125, 0, 3000, 500); //yaw电机角度PID
+static Pid_Position_t motor_yaw_speed_pid = NEW_POSITION_PID(680, 3.65, 180, 5000, 30000, 0, 1000, 500); //yaw电机速度PID
+static Pid_Position_t motor_yaw_angle_pid = NEW_POSITION_PID(1.2, 0.001, 1.8, 100, 125, 0, 3000, 500); //yaw电机角度PID
 
 static Pid_Position_t motor_pitch_speed_pid = NEW_POSITION_PID(120, 2, 0, 220, 30000, 0, 1000, 500); //pitch电机速度PID
 static Pid_Position_t motor_pitch_angle_pid = NEW_POSITION_PID(0.8, 0, 0.1, 100, 300, 0, 3000, 500); //pitch电机角度PID
@@ -62,6 +62,11 @@ void Set_Shooter_Wave_Motors_Speed(float wave_wheel)
 const Motor_measure_t *Get_Gimbal_Motor(void)
 {
     return gimbal_motor;
+}
+
+const Motor_measure_t *Get_Shooter_Wave_Motor(void)
+{
+    return &shooter_wave_motor;
 }
 
 //计算速度PID，并输出给电机
