@@ -19,17 +19,16 @@
 #define WAVE_SPEED_1 2200
 #define WAVE_SPEED_2 5000
 
-#define ONE_SHOOT_CNT 6
-#define THREE_SHOOT_CNT 16
+#define ONE_SHOOT_CNT 7
+#define THREE_SHOOT_CNT 20
 
 #define FRIC_COVER_MODE   shooter_robot_mode->fric_cover_mode
 #define SHOOT_KEY shoot_key
 
 //变量定义
 TaskHandle_t ShooterTask_Handler;
-
-static int16_t shooter_friction_speed = 1175;
 static uint8_t shoot_key = 0;
+static int16_t shooter_friction_speed = 1175;
 const static Robot_mode_t* shooter_robot_mode;
 const static Judge_data_t* judge_data;
 
@@ -41,8 +40,7 @@ void Shooter_Task(void *pvParameters)
 	int16_t wave_speed = 0;  //波轮速度
 	int16_t friction_speed = 0;  //摩擦轮速度
 	
-	int16_t one_three_shoot_speed = 0; //单发三连发速度
-	uint16_t shoot_count = 0;  //单发三连发计数
+	uint8_t shoot_count = 0;  //单发三连发计数
 	uint8_t shooting_sign = 0;  //射击标志
 
 	shooter_robot_mode = Get_Robot_Mode_Point();
@@ -87,14 +85,12 @@ void Shooter_Task(void *pvParameters)
 				{
 					case 1:
 						wave_speed = -WAVE_SPEED_ONE_SHOOT;
-						one_three_shoot_speed = -WAVE_SPEED_ONE_SHOOT;
 						shoot_count = ONE_SHOOT_CNT;
 						shoot_key = 0;
 						break;
 					
 					case 2:
 						wave_speed = -WAVE_SPEED_THREE_SHOOT;
-						one_three_shoot_speed = -WAVE_SPEED_THREE_SHOOT;
 						shoot_count = THREE_SHOOT_CNT;
 						shoot_key = 0;
 						break;
@@ -122,7 +118,6 @@ void Shooter_Task(void *pvParameters)
 					Shoot_End_Friction_Speed_Subtract(2);
 					shooting_sign = 0;
 				}
-				wave_speed = one_three_shoot_speed;
 				shoot_count--;
 			}
 			
@@ -133,8 +128,8 @@ void Shooter_Task(void *pvParameters)
 		}
 		
 		/* 设置摩擦轮 */
+		T_PWM_OUT(friction_speed);
 		U_PWM_OUT(friction_speed);
-		V_PWM_OUT(friction_speed);
 
 		/* 设置波轮速度 */
 		Set_Shooter_Wave_Motors_Speed(wave_speed);
