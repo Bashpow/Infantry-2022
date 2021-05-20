@@ -23,8 +23,6 @@
 #define RC_SW_MID ((uint8_t)3)
 #define RC_SW_DOWN ((uint8_t)2)
 
-
-
 #define ROCKER_DATA_CHECK(data) ((data > 660) || (data < -660))
 #define SWITCH_DATA_CHECK(data) (!((data == 1) || (data == 2) || (data == 3)))
 
@@ -83,11 +81,8 @@ void Parse_Remoter_Data(volatile const uint8_t *sbus_buf, Rc_ctrl_t *rc_ctrl)
 	Wasd_Key_To_Virtual_Rocker(rc_ctrl);
 
 	/* 鼠标x、y轴限幅 */
-	rc_ctrl->mouse.x = Int16_Limit(rc_ctrl->mouse.x, -1200, 1200);
-	rc_ctrl->mouse.y = Int16_Limit(rc_ctrl->mouse.y, -1200, 1200);
-
-	//DEBUG_PRINT("ch1:%d ch2:%d ch3:%d ch4:%d\r\n", rc_ctrl->virtual_rocker.ch0, rc_ctrl->virtual_rocker.ch1, rc_ctrl->virtual_rocker.ch2, rc_ctrl->virtual_rocker.ch3);
-	//DEBUG_PRINT("mx:%d, my:%d, mz:%d\r\n", rc_ctrl->mouse.x, rc_ctrl->mouse.y, rc_ctrl->mouse.z);
+	rc_ctrl->mouse.x = Int16_Limit(rc_ctrl->mouse.x, -5000, 5000);
+	rc_ctrl->mouse.y = Int16_Limit(rc_ctrl->mouse.y, -5000, 5000);
 
 }
 
@@ -168,19 +163,6 @@ void Rc_Data_Reset(Rc_ctrl_t* rc)
 
 void Wasd_Key_To_Virtual_Rocker(Rc_ctrl_t* rc)
 {
-	// if(KEY_PRESSED(KEY_A)) DEBUG_PRINT("A\r\n");
-	// if(KEY_PRESSED(KEY_W)) DEBUG_PRINT("W\r\n");
-	// if(KEY_PRESSED(KEY_S)) DEBUG_PRINT("S\r\n");
-	// if(KEY_PRESSED(KEY_D)) DEBUG_PRINT("D\r\n");
-
-	// if(KEY_PRESSED(KEY_Z)) DEBUG_PRINT("z\r\n");
-	// if(KEY_PRESSED(KEY_X)) DEBUG_PRINT("x\r\n");
-	// if(KEY_PRESSED(KEY_C)) DEBUG_PRINT("c\r\n");
-	// if(KEY_PRESSED(KEY_V)) DEBUG_PRINT("v\r\n");
-
-	// if(KEY_PRESSED(KEY_F)) DEBUG_PRINT("F\r\n");
-	// if(KEY_PRESSED(KEY_G)) DEBUG_PRINT("G\r\n");
-
 	/*只按下W时，不按下S*/
 	if(KEY_PRESSED(KEY_W) && !(KEY_PRESSED(KEY_S)))
 	{
