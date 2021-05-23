@@ -10,13 +10,13 @@
 static Motor_measure_t shooter_wave_motor; //波轮电机数据
 static Motor_measure_t gimbal_motor[2]; //云台电机数据
 
-static Pid_Position_t motor_wave_speed_pid = NEW_POSITION_PID(10.8, 0.8, 1.0, 2000, 10000, 0, 1000, 500); //波轮速度PID
+static Pid_Position_t motor_wave_speed_pid = NEW_POSITION_PID(10.8, 0.8, 0.2, 2000, 10000, 0, 1000, 500); //波轮速度PID
 
-static Pid_Position_t motor_yaw_speed_pid = NEW_POSITION_PID(680, 3.65, 180, 5000, 30000, 0, 1000, 500); //yaw电机速度PID
-static Pid_Position_t motor_yaw_angle_pid = NEW_POSITION_PID(1.2, 0.001, 1.8, 100, 125, 0, 3000, 500); //yaw电机角度PID
+static Pid_Position_t motor_yaw_speed_pid = NEW_POSITION_PID(1800, 0.8, 0.2, 5000, 30000, 0, 1000, 500); //yaw电机速度PID
+static Pid_Position_t motor_yaw_angle_pid = NEW_POSITION_PID(2.4, 0.01, 1.8, 5, 125, 0, 3000, 500); //yaw电机角度PID
 
-static Pid_Position_t motor_pitch_speed_pid = NEW_POSITION_PID(120, 2, 0, 220, 30000, 0, 1000, 500); //pitch电机速度PID
-static Pid_Position_t motor_pitch_angle_pid = NEW_POSITION_PID(0.8, 0, 0.1, 100, 300, 0, 3000, 500); //pitch电机角度PID
+static Pid_Position_t motor_pitch_speed_pid = NEW_POSITION_PID(380, 27, 0, 220, 30000, 0, 1000, 500); //pitch电机速度PID
+static Pid_Position_t motor_pitch_angle_pid = NEW_POSITION_PID(0.25, 0.018, 0.005, 100, 300, 0, 3000, 500); //pitch电机角度PID
 
 /* 函数声明 */
 static void Can2_Hook(CanRxMsg *rx_message);
@@ -36,7 +36,6 @@ typedef enum
 
 void CAN2_RX0_IRQHandler(void)
 {
-	
 	static CanRxMsg can2_rx_msg;
 	if (CAN_GetITStatus(CAN2,CAN_IT_FMP0)!= RESET)
 	{ 
@@ -81,10 +80,10 @@ void Set_Gimbal_Motors_Speed(float speed_yaw, float speed_pitch)
 }
 
 //计算YAW轴PID，角度格式为0~360
-float Calc_Yaw_Angle360_Pid(float tar_angle, float cur_speed)
+float Calc_Yaw_Angle360_Pid(float tar_angle, float cur_angle)
 {
 	float yaw_tar_angle = tar_angle;
-	float yaw_cur_angle = cur_speed;
+	float yaw_cur_angle = cur_angle;
 	
 	Handle_Angle360_PID_Over_Zero(&yaw_tar_angle, &yaw_cur_angle);
 	return Pid_Position_Calc(&motor_yaw_angle_pid, yaw_tar_angle, yaw_cur_angle);
@@ -96,7 +95,7 @@ float Calc_Pitch_Angle8191_Pid(float tar_angle)
 	float pitch_tar_angle = tar_angle;
 	float pitch_cur_angle = gimbal_motor[1].mechanical_angle;
 	Pitch_Angle_Limit(&pitch_tar_angle,PITCH_DOWN_LIMIT,PITCH_UP_LIMIT);
-	Handle_Angle8191_PID_Over_Zero(&pitch_tar_angle,&pitch_cur_angle);
+	Handle_Angle8191_PID_Over_Zero(&pitch_tar_angle, &pitch_cur_angle);
 	return Pid_Position_Calc(&motor_pitch_angle_pid, pitch_tar_angle, pitch_cur_angle);	
 }
 
