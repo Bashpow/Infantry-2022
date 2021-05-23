@@ -950,9 +950,9 @@
               <FilePath>..\USERLIB\src\listen.c</FilePath>
             </File>
             <File>
-              <FileName>custom_ui.c</FileName>
+              <FileName>client_ui.c</FileName>
               <FileType>1</FileType>
-              <FilePath>..\USERLIB\src\custom_ui.c</FilePath>
+              <FilePath>..\USERLIB\src\client_ui.c</FilePath>
             </File>
             <File>
               <FileName>crc_check.c</FileName>

@@ -1364,8 +1364,8 @@
       <tvExp>0</tvExp>
       <tvExpOptDlg>0</tvExpOptDlg>
       <bDave2>0</bDave2>
-      <PathWithFileName>..\USERLIB\src\custom_ui.c</PathWithFileName>
-      <FilenameWithoutPath>custom_ui.c</FilenameWithoutPath>
+      <PathWithFileName>..\USERLIB\src\client_ui.c</PathWithFileName>
+      <FilenameWithoutPath>client_ui.c</FilenameWithoutPath>
       <RteFlg>0</RteFlg>
       <bShared>0</bShared>
     </File>
