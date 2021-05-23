@@ -149,6 +149,9 @@ int Shell_Split_String(char * str ,char ** argv ,int maxread)
   * @return   无
 */
 #include "infantry.h"
+#ifndef VERSION
+	#define VERSION "-"
+#endif
 static void Infantry_Version(char * arg)
 {
 	shell_print("version:\t%s\r\n", VERSION);
