@@ -72,6 +72,9 @@ static void Calc_Increment_Pid(Pid_Increment_t* pid)
 
 	pid->output = pid->p_out + pid->i_out + pid->d_out;
 	
+	/*Êä³öÏŞ·ù*/
+	pid->output = Pid_Limit(pid->output, -pid->max_out, pid->max_out);
+
 	pid->old_old_err = pid->old_err;
 	pid->old_err     = pid->err;
 }
