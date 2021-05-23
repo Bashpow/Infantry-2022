@@ -11,7 +11,7 @@
 
 #define CHASSIS_SPEED_ZERO  0
 #define OUTPUT_LIMIT(data, limit)  Float_Constrain(data, -limit, limit)
-#define CHASSIS_MOTOR_DEFAULT_BASE_RATE 5.0f
+#define CHASSIS_MOTOR_DEFAULT_BASE_RATE 6.0f
 #define CHASSIS_MOTOR_GYRO_BASE_RATE 5.0f
 
 //相关变量定义
@@ -23,7 +23,7 @@ static const Motor_measure_t* yaw_motor;
 const static Judge_data_t* judge_data;
 
 static float chassis_motor_boost_rate = 1.0f;  //调用相应函数更改
-static Pid_Position_t chassis_follow_pid = NEW_POSITION_PID(0.5, 0, 0.05, 2000, 8600, 0, 1000, 500);  //底盘跟随PID
+static Pid_Position_t chassis_follow_pid = NEW_POSITION_PID(0.26, 0, 0.8, 5000, 500, 0, 1000, 500);  //底盘跟随PID
 
 //函数声明
 static uint16_t Calc_Gyro_Speed_By_Power_Limit(uint16_t power_limit);
@@ -108,15 +108,15 @@ void Chassis_Task(void *pvParameters)
 				{
 					follow_pid_output = Calc_Chassis_Follow();
 					
-					motor_speed[0] = remoter_control->rc.ch2 + remoter_control->rc.ch3 + follow_pid_output + remoter_control->rc.ch0/16.0f;
-					motor_speed[1] = remoter_control->rc.ch2 - remoter_control->rc.ch3 + follow_pid_output + remoter_control->rc.ch0/16.0f;
-					motor_speed[2] = -remoter_control->rc.ch2 + remoter_control->rc.ch3 + follow_pid_output + remoter_control->rc.ch0/16.0f;
-					motor_speed[3] = -remoter_control->rc.ch2 - remoter_control->rc.ch3 + follow_pid_output + remoter_control->rc.ch0/16.0f;
+					motor_speed[0] = remoter_control->rc.ch2 + remoter_control->rc.ch3 + follow_pid_output + remoter_control->rc.ch0/2.9f;
+					motor_speed[1] = remoter_control->rc.ch2 - remoter_control->rc.ch3 + follow_pid_output + remoter_control->rc.ch0/2.9f;
+					motor_speed[2] = -remoter_control->rc.ch2 + remoter_control->rc.ch3 + follow_pid_output + remoter_control->rc.ch0/2.9f;
+					motor_speed[3] = -remoter_control->rc.ch2 - remoter_control->rc.ch3 + follow_pid_output + remoter_control->rc.ch0/2.9f;
 					
-					motor_speed[0] *= 12;
-					motor_speed[1] *= 12;
-					motor_speed[2] *= 12;
-					motor_speed[3] *= 12;
+					motor_speed[0] *= 13;
+					motor_speed[1] *= 13;
+					motor_speed[2] *= 13;
+					motor_speed[3] *= 13;
 					
 					break;
 				}
@@ -149,10 +149,12 @@ void Chassis_Task(void *pvParameters)
 		}
 		
 		//数据大小限制
-		OUTPUT_LIMIT(&motor_speed[0], 8500);
-		OUTPUT_LIMIT(&motor_speed[1], 8500);
-		OUTPUT_LIMIT(&motor_speed[2], 8500);
-		OUTPUT_LIMIT(&motor_speed[3], 8500);
+		//额定转速 469rpm
+		//减速箱减速比约为19:1
+		OUTPUT_LIMIT(&motor_speed[0], 8888);
+		OUTPUT_LIMIT(&motor_speed[1], 8888);
+		OUTPUT_LIMIT(&motor_speed[2], 8888);
+		OUTPUT_LIMIT(&motor_speed[3], 8888);
 		
 		#if CHASSIS_SPEED_ZERO
 			motor_speed[0] = 0;
