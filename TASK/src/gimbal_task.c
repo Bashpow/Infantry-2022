@@ -44,8 +44,8 @@ void Gimbal_Task(void *pvParameters)
 				//手动模式
 				case 1:
 				{
-					yaw_angle_set -= (remoter_control->mouse.x) / 66.0f;
-					pitch_angle_set += (remoter_control->mouse.y) / 5.0f;
+					yaw_angle_set -= (remoter_control->mouse.x) / 58.0f;
+					pitch_angle_set += (remoter_control->mouse.y) / 1.6f;
 
 					//yaw角度回环
 					if(yaw_angle_set>360) yaw_angle_set -= 360;
@@ -71,8 +71,8 @@ void Gimbal_Task(void *pvParameters)
 						pitch_angle_set -= CALC_AUTOAIM_PITCH_PID();
 					}
 					
-					yaw_angle_set -= (remoter_control->mouse.x) / 66.0f;
-					pitch_angle_set += (remoter_control->mouse.y) / 3.0f;
+					yaw_angle_set -= (remoter_control->mouse.x) / 58.0f;
+					pitch_angle_set += (remoter_control->mouse.y) / 1.6f;
 
 					//yaw角度回环
 					if(yaw_angle_set>360) yaw_angle_set -= 360;
@@ -95,7 +95,7 @@ void Gimbal_Task(void *pvParameters)
 					/* Pitach角度限制 */
 					Float_Constrain(&pitch_angle_set, PITCH_UP_LIMIT, PITCH_DOWN_LIMIT);
 
-					yaw_speed = (- remoter_control->mouse.x) / 2.8f;
+					yaw_speed = (- remoter_control->mouse.x) / 1.6f;
 					pitch_speed = Calc_Pitch_Angle8191_Pid(pitch_angle_set);
 
 					break;
@@ -162,7 +162,7 @@ void Gimbal_Task(void *pvParameters)
 				//特殊
 				case 5:
 				{
-					pitch_angle_set -= remoter_control->rc.ch1 / 100.0f;
+					pitch_angle_set -= remoter_control->rc.ch1 / 12.0f;
 
 					/* Pitach角度限制 */
 					Float_Constrain(&pitch_angle_set, PITCH_UP_LIMIT, PITCH_DOWN_LIMIT);
