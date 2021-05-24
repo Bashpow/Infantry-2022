@@ -11,7 +11,7 @@
 
 #define CHASSIS_SPEED_ZERO  0
 #define OUTPUT_LIMIT(data, limit)  Float_Constrain(data, -limit, limit)
-#define CHASSIS_MOTOR_DEFAULT_BASE_RATE 6.0f
+#define CHASSIS_MOTOR_DEFAULT_BASE_RATE 5.5f
 #define CHASSIS_MOTOR_GYRO_BASE_RATE 5.0f
 
 //相关变量定义
@@ -56,10 +56,10 @@ void Chassis_Task(void *pvParameters)
 				{
 					follow_pid_output = Calc_Chassis_Follow();
 
-					motor_speed[0] = remoter_control->virtual_rocker.ch2 + remoter_control->virtual_rocker.ch3 + follow_pid_output + remoter_control->mouse.x/20;
-					motor_speed[1] = remoter_control->virtual_rocker.ch2 - remoter_control->virtual_rocker.ch3 + follow_pid_output + remoter_control->mouse.x/20;
-					motor_speed[2] = -remoter_control->virtual_rocker.ch2 + remoter_control->virtual_rocker.ch3 + follow_pid_output + remoter_control->mouse.x/20;
-					motor_speed[3] = -remoter_control->virtual_rocker.ch2 - remoter_control->virtual_rocker.ch3 + follow_pid_output + remoter_control->mouse.x/20;
+					motor_speed[0] = remoter_control->virtual_rocker.ch2 + remoter_control->virtual_rocker.ch3 + follow_pid_output + remoter_control->mouse.x/0.38f;
+					motor_speed[1] = remoter_control->virtual_rocker.ch2 - remoter_control->virtual_rocker.ch3 + follow_pid_output + remoter_control->mouse.x/0.38f;
+					motor_speed[2] = -remoter_control->virtual_rocker.ch2 + remoter_control->virtual_rocker.ch3 + follow_pid_output + remoter_control->mouse.x/0.38f;
+					motor_speed[3] = -remoter_control->virtual_rocker.ch2 - remoter_control->virtual_rocker.ch3 + follow_pid_output + remoter_control->mouse.x/0.38f;
 					
 					motor_speed[0] *= (float)(CHASSIS_MOTOR_DEFAULT_BASE_RATE * chassis_motor_boost_rate);
 					motor_speed[1] *= (float)(CHASSIS_MOTOR_DEFAULT_BASE_RATE * chassis_motor_boost_rate);
