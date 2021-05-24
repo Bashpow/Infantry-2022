@@ -13,7 +13,7 @@
 	#define DEBUG_SHOWDATA1(name, data) printf("<DEBUG> %s = %d\r\n",name,data)
 	#define DEBUG_SHOWDATA2(name, data) printf("<DEBUG> %s = %.2f\r\n",name,data)
 	#define DEBUG_ERROR(err) printf("<ERROR> error:%d\r\n",err)
-	#define DEBUG_ARRAY(name, data, len) { printf("<DEBUG>%s : {"); for(u16 __tmp_i=0; __tmp_i<len; __tmp_i++) printf("%d ", data[__tmp_i]);  printf("}\r\n"); }
+	#define DEBUG_ARRAY(name, data, len) { printf("<DEBUG>%s : {",name); for(u16 __tmp_i=0; __tmp_i<len; __tmp_i++) printf("%d ", data[__tmp_i]);  printf("}\r\n"); }
 #else
 	#define DEBUG_PRINT(format, ...)
 	#define DEBUG_LOG(format, arg...)
