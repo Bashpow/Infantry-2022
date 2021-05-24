@@ -218,11 +218,11 @@ static void Switch_Mouse_Key_Change(Rc_ctrl_t* rc, Rc_ctrl_t* last_rc, Robot_mod
 	//按住shift底盘加速
 	if( RC_KEY_PRESSED(KEY_VALUE, KEY_SHIFT) )
 	{
-		Change_Chassis_Motor_Boost_Rate(1, 2.0); //加速
+		Change_Chassis_Motor_Boost_Rate(1, 2.7); //加速
 	}
 	else
 	{
-		Change_Chassis_Motor_Boost_Rate(-1, 2.0); //减速
+		Change_Chassis_Motor_Boost_Rate(-1, 2.7); //减速
 	}
 
 	//底盘模式(按下ctrl更改底盘模式1跟随模式2小陀螺模式)
@@ -231,10 +231,12 @@ static void Switch_Mouse_Key_Change(Rc_ctrl_t* rc, Rc_ctrl_t* last_rc, Robot_mod
 		if(robot_mode->mouse_key_chassis_mode == 1)
 		{
 			robot_mode->mouse_key_chassis_mode = 2;
+			Set_Beep_Time(2, 1200, 50);
 		}
 		else
 		{
 			robot_mode->mouse_key_chassis_mode = 1;
+			Set_Beep_Time(1, 1200, 50);
 		}
 	}
 
@@ -244,12 +246,12 @@ static void Switch_Mouse_Key_Change(Rc_ctrl_t* rc, Rc_ctrl_t* last_rc, Robot_mod
 		if(robot_mode->mouse_key_gimbal_mode == 1)
 		{
 			robot_mode->mouse_key_gimbal_mode = 2;
-			// Set_Beep_Time(4, 1200, 50);
+			Set_Beep_Time(4, 1200, 50);
 		}
 		else
 		{
 			robot_mode->mouse_key_gimbal_mode = 1;
-			// Set_Beep_Time(3, 1200, 50);
+			Set_Beep_Time(3, 1200, 50);
 		}
 	}
 
