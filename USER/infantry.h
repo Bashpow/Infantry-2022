@@ -9,6 +9,6 @@
 #define VERSION "1.1"
 
 //云台GM6020电机头角度
-#define YAW_GM6020_HEAD_ANGLE 5420
+#define YAW_GM6020_HEAD_ANGLE 5450
 
 #endif

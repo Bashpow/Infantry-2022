@@ -73,17 +73,16 @@
 2. CMISS\DSP arm数学库
 3. FWLIB stm32固件库
 4. FreeRTOS FreeRTOS库
-5. USER 
+5. USER 主函数、基础用户函数
 6. DEVICE 驱动相关
 7. HARDWARE 硬件相关
 8. USERLIB 用户库
-9. TASK RTOS所有任务
-10. README
+9. SHELL 串口指令
+10. TASK RTOS所有任务
 
 ## 待改进（加入）功能
-0. 云台角度漂移问题(陀螺仪漂移，暂时无法解决)
 1. 客户端增加gui显示
 2. 模糊PID
-3. 自动瞄准优化
+3. 自动瞄准优化(参数已调整，已基本可用)
 4. 显示屏（不急）
 5. 陀螺仪（不急）
