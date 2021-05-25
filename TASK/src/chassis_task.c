@@ -56,11 +56,24 @@ void Chassis_Task(void *pvParameters)
 				{
 					follow_pid_output = Calc_Chassis_Follow();
 
-					motor_speed[0] = remoter_control->virtual_rocker.ch2 + remoter_control->virtual_rocker.ch3 + follow_pid_output + remoter_control->mouse.x/0.38f;
-					motor_speed[1] = remoter_control->virtual_rocker.ch2 - remoter_control->virtual_rocker.ch3 + follow_pid_output + remoter_control->mouse.x/0.38f;
-					motor_speed[2] = -remoter_control->virtual_rocker.ch2 + remoter_control->virtual_rocker.ch3 + follow_pid_output + remoter_control->mouse.x/0.38f;
-					motor_speed[3] = -remoter_control->virtual_rocker.ch2 - remoter_control->virtual_rocker.ch3 + follow_pid_output + remoter_control->mouse.x/0.38f;
-					
+					#if 0  //0开启防滑(ESP) 1关闭防滑
+						motor_speed[0] = remoter_control->virtual_rocker.ch2 + remoter_control->virtual_rocker.ch3 + follow_pid_output + remoter_control->mouse.x/0.38f;
+						motor_speed[1] = remoter_control->virtual_rocker.ch2 - remoter_control->virtual_rocker.ch3 + follow_pid_output + remoter_control->mouse.x/0.38f;
+						motor_speed[2] = -remoter_control->virtual_rocker.ch2 + remoter_control->virtual_rocker.ch3 + follow_pid_output + remoter_control->mouse.x/0.38f;
+						motor_speed[3] = -remoter_control->virtual_rocker.ch2 - remoter_control->virtual_rocker.ch3 + follow_pid_output + remoter_control->mouse.x/0.38f;
+					#else
+						Calc_Gyro_Motors_Speed(motor_speed, \
+						0, \
+						GM6020_YAW_Angle_To_360(yaw_motor->mechanical_angle), \
+						remoter_control->virtual_rocker.ch3, \
+						remoter_control->virtual_rocker.ch2);
+
+						motor_speed[0] += follow_pid_output + remoter_control->mouse.x/0.38f;
+						motor_speed[1] += follow_pid_output + remoter_control->mouse.x/0.38f;
+						motor_speed[2] += follow_pid_output + remoter_control->mouse.x/0.38f;
+						motor_speed[3] += follow_pid_output + remoter_control->mouse.x/0.38f;
+					#endif
+
 					motor_speed[0] *= (float)(CHASSIS_MOTOR_DEFAULT_BASE_RATE * chassis_motor_boost_rate);
 					motor_speed[1] *= (float)(CHASSIS_MOTOR_DEFAULT_BASE_RATE * chassis_motor_boost_rate);
 					motor_speed[2] *= (float)(CHASSIS_MOTOR_DEFAULT_BASE_RATE * chassis_motor_boost_rate);
@@ -87,8 +100,8 @@ void Chassis_Task(void *pvParameters)
 					Calc_Gyro_Motors_Speed(motor_speed, \
 					0, \
 					GM6020_YAW_Angle_To_360(yaw_motor->mechanical_angle), \
-					remoter_control->virtual_rocker.ch3 * 6, \
-					remoter_control->virtual_rocker.ch2 * 5);
+					remoter_control->virtual_rocker.ch3 * 6.0f, \
+					remoter_control->virtual_rocker.ch2 * 6.0f);
 					
 					break;
 				}
@@ -113,10 +126,10 @@ void Chassis_Task(void *pvParameters)
 					motor_speed[2] = -remoter_control->rc.ch2 + remoter_control->rc.ch3 + follow_pid_output + remoter_control->rc.ch0/2.9f;
 					motor_speed[3] = -remoter_control->rc.ch2 - remoter_control->rc.ch3 + follow_pid_output + remoter_control->rc.ch0/2.9f;
 					
-					motor_speed[0] *= 13;
-					motor_speed[1] *= 13;
-					motor_speed[2] *= 13;
-					motor_speed[3] *= 13;
+					motor_speed[0] *= 13.5f;
+					motor_speed[1] *= 13.5f;
+					motor_speed[2] *= 13.5f;
+					motor_speed[3] *= 13.5f;
 					
 					break;
 				}
@@ -128,8 +141,8 @@ void Chassis_Task(void *pvParameters)
 					Calc_Gyro_Motors_Speed(motor_speed, \
 					Calc_Gyro_Speed_By_Power_Limit(judge_data->game_robot_status.chassis_power_limit), \
 					GM6020_YAW_Angle_To_360(yaw_motor->mechanical_angle), \
-					remoter_control->rc.ch3 * 6, \
-					remoter_control->rc.ch2 * 6);
+					remoter_control->rc.ch3 * 8.0f, \
+					remoter_control->rc.ch2 * 8.0f);
 					break;
 				}
 				
@@ -139,8 +152,8 @@ void Chassis_Task(void *pvParameters)
 					Calc_Gyro_Motors_Speed(motor_speed, \
 					0, \
 					GM6020_YAW_Angle_To_360(yaw_motor->mechanical_angle), \
-					remoter_control->rc.ch3 * 10, \
-					remoter_control->rc.ch2 * 10);
+					remoter_control->rc.ch3 * 10.0f, \
+					remoter_control->rc.ch2 * 10.0f);
 					break;
 				}
 				
@@ -151,10 +164,10 @@ void Chassis_Task(void *pvParameters)
 		//数据大小限制
 		//额定转速 469rpm
 		//减速箱减速比约为19:1
-		OUTPUT_LIMIT(&motor_speed[0], 8888);
-		OUTPUT_LIMIT(&motor_speed[1], 8888);
-		OUTPUT_LIMIT(&motor_speed[2], 8888);
-		OUTPUT_LIMIT(&motor_speed[3], 8888);
+		OUTPUT_LIMIT(&motor_speed[0], 8899);
+		OUTPUT_LIMIT(&motor_speed[1], 8899);
+		OUTPUT_LIMIT(&motor_speed[2], 8899);
+		OUTPUT_LIMIT(&motor_speed[3], 8899);
 		
 		#if CHASSIS_SPEED_ZERO
 			motor_speed[0] = 0;
@@ -225,7 +238,7 @@ static float Calc_Chassis_Follow(void)
 /**
   * @brief          计算小陀螺时，各个电机速度
   * 
-  * 效果：底盘以设置速度小陀螺旋转，同时可以以云台枪管为头，前进后退、左右平移
+  * 效果：底盘以设置速度小陀螺旋转或处于特殊状态，同时可以以云台枪管为头，前进后退、左右平移
   * 
   * @author         Bashpow
   * @param[in]      储存电机速度的指针
