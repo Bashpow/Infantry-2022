@@ -1,5 +1,6 @@
 #include "shooter_task.h"
 
+#include "math2.h"
 #include "timer2.h"
 #include "can2_motor.h"
 #include "remoter_task.h"
@@ -28,7 +29,7 @@
 //变量定义
 TaskHandle_t ShooterTask_Handler;
 static uint8_t shoot_key = 0;
-static int16_t shooter_friction_speed = 1175;
+static int16_t shooter_friction_speed = 1170;
 const static Robot_mode_t* shooter_robot_mode;
 const static Judge_data_t* judge_data;
 
@@ -141,6 +142,14 @@ void Shooter_Task(void *pvParameters)
 	
 }
 
+// speed -> pwm
+// y = -0.0019x4 + 0.1998x3 - 6.8204x2 + 99.437x + 648.01
+static uint16_t Shooter_Friction_Speed_To_Pwm(float speed)
+{
+	float pwm = (-0.0019f*speed*speed*speed*speed) + (0.1998f*speed*speed*speed) + (-6.8204f*speed*speed) + (99.437f*speed) + 648.01f;
+	return (uint16_t)pwm;
+}
+
 //射击结束（松开鼠标左键）摩擦轮速度降低
 static void Shoot_End_Friction_Speed_Subtract(uint16_t minus_speed)
 {
@@ -159,9 +168,36 @@ void Set_Shoot_key(u8 key)
 	shoot_key = key;
 }
 
+#define SHOOTER_FRICTION_SPEED_TO_PWM(speed)  Shooter_Friction_Speed_To_Pwm(speed)
+//在裁判系统收到子弹速度限制时调用（所以不用判断裁判系统是否在线），在子弹速度限制变更时调整摩擦轮速度
+void Shooter_Friction_Speed_Base_Limit(uint16_t speed_limit)
+{
+	static uint16_t last_speed_limit = 0;
+	if(last_speed_limit != speed_limit)
+	{
+		last_speed_limit = speed_limit;
+		FRICTION_SPEED_1 = SHOOTER_FRICTION_SPEED_TO_PWM( ((float)(judge_data->game_robot_status.shooter_id1_17mm_speed_limit) - 2.5f) );
+		Int16_Constrain(&FRICTION_SPEED_1, 1160, 1300);
+	}
+}
+
 //在裁判系统收到发射数据后调用（所以不用判断裁判系统是否在线）,用于动态限制发射子弹速度
 void Shooter_Friction_Speed_Limit(void)
 {
+	//PWM 上下限制
+	if (FRICTION_SPEED_1 < SHOOTER_FRICTION_SPEED_TO_PWM( ((float)(judge_data->game_robot_status.shooter_id1_17mm_speed_limit) - 3.0f) ) )
+	{
+		FRICTION_SPEED_1 = SHOOTER_FRICTION_SPEED_TO_PWM( ((float)(judge_data->game_robot_status.shooter_id1_17mm_speed_limit) - 2.5f) );
+		Int16_Constrain(&FRICTION_SPEED_1, 1160, 1300);
+		return;
+	}
+	else if(FRICTION_SPEED_1 > SHOOTER_FRICTION_SPEED_TO_PWM( ((float)(judge_data->game_robot_status.shooter_id1_17mm_speed_limit) - 0.5f) ) )
+	{
+		FRICTION_SPEED_1 = SHOOTER_FRICTION_SPEED_TO_PWM( ((float)(judge_data->game_robot_status.shooter_id1_17mm_speed_limit) - 2.5f) );
+		Int16_Constrain(&FRICTION_SPEED_1, 1160, 1300);
+		return;
+	}
+
 	if (judge_data->shoot_data.bullet_speed < ((float)(judge_data->game_robot_status.shooter_id1_17mm_speed_limit) - 2.0f) )
 	{
 		FRICTION_SPEED_1++;
@@ -172,9 +208,14 @@ void Shooter_Friction_Speed_Limit(void)
 		FRICTION_SPEED_1 -= 1;
 	}
 
-	if (judge_data->shoot_data.bullet_speed > ((float)(judge_data->game_robot_status.shooter_id1_17mm_speed_limit) - 0.8f))
+	if (judge_data->shoot_data.bullet_speed > ((float)(judge_data->game_robot_status.shooter_id1_17mm_speed_limit) - 0.6f))
 	{
 		FRICTION_SPEED_1 -= 2;
 	}
+	if (judge_data->shoot_data.bullet_speed > ((float)(judge_data->game_robot_status.shooter_id1_17mm_speed_limit) + 1.0f))
+	{
+		FRICTION_SPEED_1 -= 5;
+	}
+	Int16_Constrain(&FRICTION_SPEED_1, 1160, 1300);
 }
 

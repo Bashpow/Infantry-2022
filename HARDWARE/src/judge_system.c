@@ -225,7 +225,7 @@ static uint8_t Analysis_Shoot_Data(u8 *data_package, uint16_t data_len)
 	
 	memcpy(&judge_data.shoot_data, data_package, 7);
 	Shooter_Friction_Speed_Limit();
-	//DEBUG_SHOWDATA2("bullet_speed", judge_data.shoot_data.bullet_speed);
+	// DEBUG_SHOWDATA2("bullet_speed", judge_data.shoot_data.bullet_speed);
 	
 	return 1;
 }
@@ -245,6 +245,7 @@ static uint8_t Analysis_Game_Robot_Status(u8 *data_package, uint16_t data_len)
 
 	//机器人 1 号 17mm 枪口上限速度 单位 m/s
 	judge_data.game_robot_status.shooter_id1_17mm_speed_limit = U8_Array_To_U16(&data_package[10]);
+	Shooter_Friction_Speed_Base_Limit(judge_data.game_robot_status.shooter_id1_17mm_speed_limit); //射速变更时，调整摩擦轮速度
 
 	//底盘功率上限
 	judge_data.game_robot_status.chassis_power_limit = U8_Array_To_U16(&data_package[24]);

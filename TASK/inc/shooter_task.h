@@ -12,6 +12,7 @@ void Shooter_Task(void *pvParameters);
 
 void Set_Shoot_key(u8 key);
 
+void Shooter_Friction_Speed_Base_Limit(uint16_t speed_limit);
 void Shooter_Friction_Speed_Limit(void);
 
 #endif
