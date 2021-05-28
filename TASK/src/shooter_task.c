@@ -2,6 +2,7 @@
 
 #include "math2.h"
 #include "timer2.h"
+#include "pid.h"
 #include "can2_motor.h"
 #include "remoter_task.h"
 #include "buzzer_task.h"
@@ -11,6 +12,8 @@
 #define COVER_OPEN()  S_PWM_OUT(2250);
 #define COVER_CLOSE() S_PWM_OUT(1415);
 
+#define FRICTION_MIN     1160
+#define FRICTION_MAX     1280
 #define FRICTION_STOP    800
 #define FRICTION_SPEED_1 shooter_friction_speed
 #define FRICTION_SPEED_2 1280
@@ -26,12 +29,16 @@
 #define FRIC_COVER_MODE   shooter_robot_mode->fric_cover_mode
 #define SHOOT_KEY shoot_key
 
+#define CALC_FRICTION_SPEED_PID() Pid_Position_Calc(&motor_friction_speed_pid, ((float)(judge_data->game_robot_status.shooter_id1_17mm_speed_limit) - 2.0f), judge_data->shoot_data.bullet_speed)
+
 //变量定义
 TaskHandle_t ShooterTask_Handler;
 static uint8_t shoot_key = 0;
 static int16_t shooter_friction_speed = 1170;
 const static Robot_mode_t* shooter_robot_mode;
 const static Judge_data_t* judge_data;
+static Pid_Position_t motor_friction_speed_pid = NEW_POSITION_PID(2.0f, 0.1, 0, 8, 12, 0, 1000, 500); //波轮速度PID
+static int16_t motor_friction_speed_max;
 
 //函数声明
 static void Shoot_End_Friction_Speed_Subtract(uint16_t minus_speed);
@@ -176,46 +183,21 @@ void Shooter_Friction_Speed_Base_Limit(uint16_t speed_limit)
 	if(last_speed_limit != speed_limit)
 	{
 		last_speed_limit = speed_limit;
-		FRICTION_SPEED_1 = SHOOTER_FRICTION_SPEED_TO_PWM( ((float)(judge_data->game_robot_status.shooter_id1_17mm_speed_limit) - 2.5f) );
-		Int16_Constrain(&FRICTION_SPEED_1, 1160, 1300);
+		FRICTION_SPEED_1 = SHOOTER_FRICTION_SPEED_TO_PWM( ((float)(judge_data->game_robot_status.shooter_id1_17mm_speed_limit) - 5.0f) );
+		motor_friction_speed_max = SHOOTER_FRICTION_SPEED_TO_PWM( (float)(judge_data->game_robot_status.shooter_id1_17mm_speed_limit)-1.0f );
+		Int16_Constrain(&FRICTION_SPEED_1, FRICTION_MIN, FRICTION_MAX);
+		Int16_Constrain(&motor_friction_speed_max, FRICTION_MIN, FRICTION_MAX);
 	}
 }
 
 //在裁判系统收到发射数据后调用（所以不用判断裁判系统是否在线）,用于动态限制发射子弹速度
 void Shooter_Friction_Speed_Limit(void)
 {
-	//PWM 上下限制
-	if (FRICTION_SPEED_1 < SHOOTER_FRICTION_SPEED_TO_PWM( ((float)(judge_data->game_robot_status.shooter_id1_17mm_speed_limit) - 3.0f) ) )
+	if(judge_data->shoot_data.bullet_speed > (float)(judge_data->game_robot_status.shooter_id1_17mm_speed_limit))
 	{
-		FRICTION_SPEED_1 = SHOOTER_FRICTION_SPEED_TO_PWM( ((float)(judge_data->game_robot_status.shooter_id1_17mm_speed_limit) - 2.5f) );
-		Int16_Constrain(&FRICTION_SPEED_1, 1160, 1300);
-		return;
+		motor_friction_speed_max = FRICTION_SPEED_1;
 	}
-	else if(FRICTION_SPEED_1 > SHOOTER_FRICTION_SPEED_TO_PWM( ((float)(judge_data->game_robot_status.shooter_id1_17mm_speed_limit) - 0.5f) ) )
-	{
-		FRICTION_SPEED_1 = SHOOTER_FRICTION_SPEED_TO_PWM( ((float)(judge_data->game_robot_status.shooter_id1_17mm_speed_limit) - 2.5f) );
-		Int16_Constrain(&FRICTION_SPEED_1, 1160, 1300);
-		return;
-	}
-
-	if (judge_data->shoot_data.bullet_speed < ((float)(judge_data->game_robot_status.shooter_id1_17mm_speed_limit) - 2.0f) )
-	{
-		FRICTION_SPEED_1++;
-	}
-
-	if (judge_data->shoot_data.bullet_speed > ((float)(judge_data->game_robot_status.shooter_id1_17mm_speed_limit) - 1.2f))
-	{
-		FRICTION_SPEED_1 -= 1;
-	}
-
-	if (judge_data->shoot_data.bullet_speed > ((float)(judge_data->game_robot_status.shooter_id1_17mm_speed_limit) - 0.6f))
-	{
-		FRICTION_SPEED_1 -= 2;
-	}
-	if (judge_data->shoot_data.bullet_speed > ((float)(judge_data->game_robot_status.shooter_id1_17mm_speed_limit) + 1.0f))
-	{
-		FRICTION_SPEED_1 -= 5;
-	}
-	Int16_Constrain(&FRICTION_SPEED_1, 1160, 1300);
+	FRICTION_SPEED_1 += Int16_Limit( CALC_FRICTION_SPEED_PID(), -12, 2 );
+	Int16_Constrain(&FRICTION_SPEED_1, FRICTION_MIN, motor_friction_speed_max);  //摩擦轮速度总体限制
 }
 
