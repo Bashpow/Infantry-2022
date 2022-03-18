@@ -3,7 +3,9 @@
 #include "judge_task.h"
 #include "judge_system.h"
 
-static u8 uart8_rx_buf[128];
+#define JUDGE_SYSTEM_RX_MAX_LEN 256
+
+static u8 uart8_rx_buf[JUDGE_SYSTEM_RX_MAX_LEN];
 static u8 uart8_rx_length = 0;
 
 void Usart8_Init(void)
@@ -54,7 +56,7 @@ void Usart8_Init(void)
 	DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t)&(UART8->DR);
 	DMA_InitStructure.DMA_Memory0BaseAddr = (uint32_t)uart8_rx_buf;
 	DMA_InitStructure.DMA_DIR = DMA_DIR_PeripheralToMemory;
-	DMA_InitStructure.DMA_BufferSize = 128;
+	DMA_InitStructure.DMA_BufferSize = JUDGE_SYSTEM_RX_MAX_LEN;
 	DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
 	DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;
 	DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_Byte;
@@ -85,10 +87,10 @@ void UART8_IRQHandler(void)
 		(void)UART8->DR;
 		
 		//计算接收到的数据长度
-		uart8_rx_length = 128 - DMA_GetCurrDataCounter(DMA1_Stream6);
+		uart8_rx_length = JUDGE_SYSTEM_RX_MAX_LEN - DMA_GetCurrDataCounter(DMA1_Stream6);
 		
 		//重设传输长度
-		DMA_SetCurrDataCounter(DMA1_Stream6, 128);
+		DMA_SetCurrDataCounter(DMA1_Stream6, JUDGE_SYSTEM_RX_MAX_LEN);
 		
 		//通知裁判系统任务解析
 		Notify_Judge_Task(uart8_rx_length);
