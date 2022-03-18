@@ -7,6 +7,37 @@ uint16_t Get_CRC16_Check_Sum_UI(uint8_t *pchMessage, uint32_t dwLength, uint16_t
 
 // 包序号
 static unsigned char UI_Seq = 0;
+static uint16_t current_robot_id = 0;
+static uint16_t current_cilent_id =0;
+
+/**
+ * @brief 获取机器人对应的客户端ID
+ * 
+ * @param robot_id 机器人ID
+ * @return uint16_t 对应的客户端ID
+ */
+uint16_t UI_Get_Comparable_Client_Id(const uint16_t robot_id)
+{
+	return robot_id+0x100;
+}
+
+/**
+ * @brief 设置当前机器人ID，客户端会同时设置成对应的ID
+ * 
+ * @param robot_id 机器人ID
+ * @return uint8_t 成功1，失败0
+ */
+uint8_t UI_Set_Comparable_Id(const uint16_t robot_id)
+{
+	if (!((robot_id >= UI_Data_RobotID_RHero && robot_id <= UI_Data_RobotID_RRadar) 
+	|| (robot_id >= UI_Data_RobotID_BHero && robot_id <= UI_Data_RobotID_BRadar)))
+	{
+		return 0u;
+	}
+	current_robot_id = robot_id;
+	current_cilent_id = UI_Get_Comparable_Client_Id(robot_id);
+	return 1u;
+}
 
 /**
  * @brief 获取UI要发送的数据帧的总长度，数据帧必须是无错误的
@@ -447,6 +478,9 @@ int Char_ReFresh(uint8_t *send_buf, String_Data string_Data)
 
 
 /* --- BEGIN 客户端UI专用的CRC8、CRC16校验值计算 BEGIN --- */
+#ifndef NULL
+#define NULL 0
+#endif
 const unsigned char CRC8_INIT_UI = 0xff; 
 const unsigned char CRC8_TAB_UI[256] = 
 { 

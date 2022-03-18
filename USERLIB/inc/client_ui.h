@@ -11,11 +11,8 @@
 #define UI_MAX_SEND_FRAME_BYTE 113u
 
 // 机器人角色以对应客户端设置
-#define Robot_ID UI_Data_RobotID_BHero
-#define Cilent_ID UI_Data_CilentID_BHero
-
-#define NULL 0
-#define __FALSE 100
+#define Robot_ID current_robot_id
+#define Cilent_ID current_cilent_id
 
 // 开始标志
 #define UI_SOF 0xA5
