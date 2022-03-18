@@ -43,7 +43,7 @@ uint8_t UI_Set_Comparable_Id(const uint16_t robot_id)
  * @brief 获取UI要发送的数据帧的总长度，数据帧必须是无错误的
  * 
  * @param point 数据帧的头指针
- * @return uint16_t 数据长度
+ * @return uint16_t 数据总长度
  */
 uint16_t UI_Get_Send_Data_Len(const void* point)
 {
@@ -293,10 +293,10 @@ void Float_Draw(Graph_Data *image, char imagename[3], uint32_t Graph_Operate, ui
  * @param Start_y 开始坐标
  * @param Char_Data 待发送字符串开始地址
  */
-void Char_Draw(String_Data *image,char imagename[3],u32 Graph_Operate,u32 Graph_Layer,u32 Graph_Color,u32 Graph_Size,u32 Graph_Digit,u32 Graph_Width,u32 Start_x,u32 Start_y,char *Char_Data)
+void Char_Draw(String_Data *image, char imagename[3], u32 Graph_Operate, u32 Graph_Layer, u32 Graph_Color, u32 Graph_Size, u32 Graph_Digit, u32 Graph_Width, u32 Start_x, u32 Start_y, char *Char_Data)
 {
 	int i;
-	for (int i = 0; i < 3 && imagename[i] !='\0'; i++)
+	for (int i = 0; i < 3 && imagename[i] != '\0'; i++)
 	{
 		image->Graph_Control.graphic_name[2 - i] = imagename[i];
 	}
