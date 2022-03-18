@@ -9,20 +9,41 @@
 // --------------------------------------------------------------------------------
 //crc8 generator polynomial:G(x)=x8+x5+x4+1
 
+/**
+ * @brief 裁判系统条目（单个）
+ * 命令ID---数据长度---存储空间首地址
+ * 
+ */
+struct Judge_System_Connect_Item {
+	uint16_t cmd_id;
+	uint16_t data_len;
+	void* save_space;
+};
 
-/* 命令ID */
-typedef enum
-{
-	Game_Status = 0x0001,      //比赛状态数据，1Hz 周期发送(0x0001)
-	Game_Result=0x0002,        //比赛结果数据，比赛结束后发送(0x0002)
-	Game_Robot_HP=0x0003,      //比赛机器人血量数据，1Hz 周期发送(0x0003)
-	Game_Robot_Status=0x0201,  //比赛机器人状态：0x0201。发送频率：10Hz
-	Power_Heat_Data=0x0202,    //实时功率热量数据，50Hz 周期发送(0x0202)
-	Shoot_Data=0x0207          //实时射击信息。发送频率：射击后发送(0x0207)
-}Cmd_ID;
+/**
+ * @brief 裁判系统条目链表节点
+ * 
+ */
+typedef struct _Judge_System_Connect_Item_Node {
+	struct Judge_System_Connect_Item data;
+	struct _Judge_System_Connect_Item_Node* next;
+}Judge_System_Connect_Item_Node;
+
+void _Judge_System_Connect_Register(Judge_System_Connect_Item_Node *root, Judge_System_Connect_Item_Node *new_item, const uint16_t cmd_id, const uint16_t data_len, void *save_space);
+
+/**
+ * @brief 裁判系统条目注册
+ * 
+ */
+#define Judge_System_Connect_Item_Register(cmd_id, data_len, save_space) \
+{ \
+	static Judge_System_Connect_Item_Node new_connect_item = {0}; \
+	_Judge_System_Connect_Register(&judge_system_connect_root, &new_connect_item, cmd_id, data_len, save_space); \
+}
 
 typedef  struct
 {
+	// 弃用
 	__packed struct
 	{
 		uint8_t robot_id;
@@ -44,6 +65,7 @@ typedef  struct
 		uint8_t mains_power_shooter_output : 1;
 	}game_robot_status;
 	
+	// 弃用
 	__packed struct
 	{
 		uint16_t chassis_volt; 
@@ -54,7 +76,42 @@ typedef  struct
 		uint16_t shooter_id2_17mm_cooling_heat;
 		uint16_t shooter_id1_42mm_cooling_heat;
 	}power_heat_data;
-	
+
+	// 0x0201
+	__packed struct
+	{
+		uint8_t robot_id;
+		uint8_t robot_level;
+		uint16_t remain_HP;
+		uint16_t max_HP;
+		uint16_t shooter_id1_17mm_cooling_rate;
+		uint16_t shooter_id1_17mm_cooling_limit;
+		uint16_t shooter_id1_17mm_speed_limit;
+		uint16_t shooter_id2_17mm_cooling_rate;
+		uint16_t shooter_id2_17mm_cooling_limit;
+		uint16_t shooter_id2_17mm_speed_limit;
+		uint16_t shooter_id1_42mm_cooling_rate;
+		uint16_t shooter_id1_42mm_cooling_limit;
+		uint16_t shooter_id1_42mm_speed_limit;
+		uint16_t chassis_power_limit;
+		uint8_t mains_power_gimbal_output : 1;
+		uint8_t mains_power_chassis_output : 1;
+		uint8_t mains_power_shooter_output : 1;
+	} ext_game_robot_status_t;
+
+	// 0x0202
+	__packed struct
+	{
+		uint16_t chassis_volt;
+		uint16_t chassis_current;
+		float chassis_power;
+		uint16_t chassis_power_buffer;
+		uint16_t shooter_id1_17mm_cooling_heat;
+		uint16_t shooter_id2_17mm_cooling_heat;
+		uint16_t shooter_id1_42mm_cooling_heat;
+	} ext_power_heat_data_t;
+
+	// 弃用
 	__packed struct
 	{
 		uint8_t bullet_type;
@@ -64,6 +121,8 @@ typedef  struct
 	}shoot_data;
 
 }Judge_data_t;
+
+void Judge_System_Connect_List_Init(void);
 
 const Judge_data_t* Get_Judge_Data(void);
 

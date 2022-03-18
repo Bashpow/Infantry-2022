@@ -1,10 +1,10 @@
 #include "judge_system.h"
-#include "crc_check.h"
+#include "string.h"
 #include "math2.h"
+#include "crc_check.h"
 #include "remoter_task.h"
 #include "shooter_task.h"
 #include "power_output.h"
-#include "detect_task.h"
 
 /* 裁判系统调试宏定义 */
 #if 0
@@ -30,24 +30,76 @@ u8 Check_Package_Crc16(u8 *get_data, u16 data_len);
 uint16_t Analysis_Cmd_Id(u8 *get_data);
 uint8_t Analysis_Data(u8 *get_data, uint16_t data_len);
 
-static uint8_t Analysis_Power_Heat_Data(u8 *data_package, uint16_t data_len);
-static uint8_t Analysis_Shoot_Data(u8 *data_package, uint16_t data_len);
-static uint8_t Analysis_Game_Robot_Status(u8 *data_package, uint16_t data_len);
-
 //裁判系统数据定义
 static Judge_data_t judge_data;
 
+/**
+ * @brief 获取裁判系统数据
+ * 
+ * @return const Judge_data_t* 返回的数据头指针
+ */
 const Judge_data_t* Get_Judge_Data(void)
 {
 	return &judge_data;
 }
 
-/*
-  函数名：Analysis_Judge_System
-  描述  ：解析裁判系统数据
-  参数  ：get_data需要解析的帧头数据，data_len数据长度
-  返回值：0--解析失败 1--解析成功
-*/
+
+// 裁判系统数据连接列表链表头节点
+static Judge_System_Connect_Item_Node judge_system_connect_root;
+
+/**
+ * @brief 注册单个解析连接条目（在使用解析函数之前必须完成注册）
+ * 
+ * @param root 头节点指针
+ * @param new_item 新条目指针，不允许为局部变量，全局变量或从内存池中申请的空间或其他
+ * @param cmd_id 对应的命令ID
+ * @param data_len 对应的数据帧长度
+ * @param save_space 对应的数据存放空间（强烈建议使用官方裁判系统用户手册上提供的结构体）
+ */
+void _Judge_System_Connect_Register(Judge_System_Connect_Item_Node *root, Judge_System_Connect_Item_Node *new_item, const uint16_t cmd_id, const uint16_t data_len, void *save_space)
+{
+	// 头节点
+	Judge_System_Connect_Item_Node *node = root;
+
+	// 新数据项赋值
+	new_item->data.cmd_id = cmd_id;
+	new_item->data.data_len = data_len;
+	new_item->data.save_space = save_space;
+	new_item->next = NULL;
+
+	// 将条目插入链表尾部
+	while( node->next != NULL )
+	{
+		node = node->next;
+	}
+	node->next = new_item;
+}
+
+/**
+ * @brief 初始化裁判系统数据连接列表，将要解析的数据都加入该初始化函数
+ * 
+ */
+void Judge_System_Connect_List_Init(void)
+{
+	// 头节点初始化
+	judge_system_connect_root.data.cmd_id = 0;
+	judge_system_connect_root.data.data_len = 0;
+	judge_system_connect_root.data.save_space = 0;
+	judge_system_connect_root.next = NULL;
+
+	// 添加解析节点
+	Judge_System_Connect_Item_Register(0x0201, 27, (void*)&judge_data.ext_game_robot_status_t);
+	Judge_System_Connect_Item_Register(0x0202, 16, (void*)&judge_data.ext_power_heat_data_t);
+}
+
+
+/**
+ * @brief 解析裁判系统数据
+ * 
+ * @param get_data 需要解析的帧头数据
+ * @param data_len 数据长度
+ * @return uint8_t 0--解析失败 1--解析成功
+ */
 uint8_t Analysis_Judge_System(u8 *get_data, u16 data_len)
 {
 	u8 a5_position[8]; //0xA5的位置
@@ -83,19 +135,20 @@ uint8_t Analysis_Judge_System(u8 *get_data, u16 data_len)
 		
 		// DEBUG_PRINT("x%d len:%d p:%d id:%d\r\n", i, data_length[i], a5_position[i], Analysis_Cmd_Id( &get_data[ (a5_position[i]) ] ) );
 		
-		
 	}
 	
 	return 1;
 }
 
 
-/*
-  函数名：Find_All_A5
-  描述  ：找到所有帧头的头
-  参数  ：get_data需要解析的帧头数据，data_len数据长度，r_position 0xA5位置数组，r_a5_length返回数组长度的长度
-  返回值：无
-*/
+/**
+ * @brief 找到所有帧头的头
+ * 
+ * @param get_data 需要解析的帧头数据
+ * @param data_len 数据长度
+ * @param r_position 存放0xA5位置数组
+ * @param r_a5_length 返回数组长度的长度
+ */
 void Find_All_A5(u8 *get_data, u16 data_len, u8 *r_position, u8 *r_a5_length)
 {
 	*r_a5_length = 0;
@@ -111,12 +164,15 @@ void Find_All_A5(u8 *get_data, u16 data_len, u8 *r_position, u8 *r_a5_length)
 	}
 }
 
-/*
-  函数名：Analysis_Frame_Header
-  描述  ：解析帧头数据
-  参数  ：get_data需要解析的数据包，r_data_length返回数据帧中 data 的长度，r_seq返回seq值
-  返回值：0--解析失败 1--解析成功
-*/
+
+/**
+ * @brief 解析帧头数据
+ * 
+ * @param get_data 需要解析的数据包
+ * @param r_data_length 返回数据帧中 data 的长度
+ * @param r_seq 返回seq值
+ * @return uint8_t 0--解析失败 1--解析成功
+ */
 uint8_t Analysis_Frame_Header(u8 *get_data, u16 *r_data_length, u8 *r_seq)
 {
 	JUDGE_ARRAY("head", get_data, 5);
@@ -150,135 +206,73 @@ uint8_t Analysis_Frame_Header(u8 *get_data, u16 *r_data_length, u8 *r_seq)
 	return 1;
 }
 
-/*
-  函数名：Check_Package_Crc16
-  描述  ：一个数据包进行CRC16校验
-  参数  ：get_data需要解析的数据包， data_len包长度
-  返回值：0--解析失败 1--解析成功
-*/
+
+/**
+ * @brief 一个数据包进行CRC16校验
+ * 
+ * @param get_data 需要解析的数据包
+ * @param data_len 包长度
+ * @return u8 0--解析失败 1--解析成功
+ */
 u8 Check_Package_Crc16(u8 *get_data, u16 data_len)
 {
 	return Verify_CRC16_Check_Sum(get_data, data_len);
 }
 
-/*
-  函数名：Analysis_Cmd_Id
-  描述  ：解析命令ID数据
-  参数  ：get_data需要解析的数据包
-  返回值：cmd_id
-*/
+
+/**
+ * @brief 解析命令ID数据
+ * 
+ * @param get_data 需要解析的数据包
+ * @return uint16_t 命令ID cmd_id
+ */
 uint16_t Analysis_Cmd_Id(u8 *get_data)
 {
 	return get_data[5] + (get_data[6]<<8);
 }
 
-/*
-  函数名：Analysis_Data
-  描述  ：解析data数据
-  参数  ：get_data需要解析的数据包, data_len data的长度
-  返回值：0--解析失败 1--解析成功
-*/
+
+/**
+ * @brief 解析data数据
+ * 
+ * @param get_data 需要解析的数据包
+ * @param data_len data的长度
+ * @return uint8_t 0--解析失败 1--解析成功
+ */
 uint8_t Analysis_Data(u8 *get_data, uint16_t data_len)
 {
+	Judge_System_Connect_Item_Node* node = &judge_system_connect_root;
 	uint16_t cmd_id = get_data[5] | (get_data[6]<<8);
 	
-	switch (cmd_id)
+	// 遍历链表所有节点
+	while( node->next != NULL )
 	{
-		//实时功率热量数据
-		case Power_Heat_Data:
-			return Analysis_Power_Heat_Data(&get_data[7], data_len);
-			//break;
-		
-		//实时射击信息
-		case Shoot_Data:
-			return Analysis_Shoot_Data(&get_data[7], data_len);
-			//break;
-		
-		//实时比赛机器人状态
-		case Game_Robot_Status:
-			return Analysis_Game_Robot_Status(&get_data[7], data_len);
-			//break;
-		
+		node = node->next;
+		if(cmd_id == node->data.cmd_id)
+		{
+			if (data_len == node->data.data_len)
+			{
+				memcpy(node->data.save_space, &get_data[7], data_len);
+				return 1u;
+			}
+			else
+			{
+				return 0u;
+			}
+		}
 	}
-	
 	return 0x0A;
 }
 
-//解析实时功率热量数据
-static uint8_t Analysis_Power_Heat_Data(u8 *data_package, uint16_t data_len)
-{
-	DATA_LEN_CHECK(data_len, 16, 503);
-	
-	judge_data.power_heat_data.chassis_power = Hex4_To_Float1(&data_package[4]);
-	judge_data.power_heat_data.chassis_power_buffer = U8_Array_To_U16(&data_package[8]);
-	judge_data.power_heat_data.shooter_id1_17mm_cooling_heat = U8_Array_To_U16(&data_package[10]);
-	
-	// DEBUG_SHOWDATA2("chassis_power", judge_data.power_heat_data.chassis_power);
-
-	return 1;
-}
-
-//解析实时射击信息
-static uint8_t Analysis_Shoot_Data(u8 *data_package, uint16_t data_len)
-{
-	DATA_LEN_CHECK(data_len, 7, 504);
-	
-	memcpy(&judge_data.shoot_data, data_package, 7);
-	Shooter_Friction_Speed_Limit();
-	// DEBUG_SHOWDATA2("bullet_speed", judge_data.shoot_data.bullet_speed);
-	
-	return 1;
-}
-
-//解析比赛机器人状态
-static uint8_t Analysis_Game_Robot_Status(u8 *data_package, uint16_t data_len)
-{
-	DATA_LEN_CHECK(data_len, 27, 505);
-	
-	judge_data.game_robot_status.robot_id = data_package[0];
-
-	//机器人 1 号 17mm 枪口每秒冷却值
-	judge_data.game_robot_status.shooter_id1_17mm_cooling_rate = U8_Array_To_U16(&data_package[6]);
-
-	//机器人 1 号 17mm 枪口热量上限
-	judge_data.game_robot_status.shooter_id1_17mm_cooling_limit = U8_Array_To_U16(&data_package[8]);
-
-	//机器人 1 号 17mm 枪口上限速度 单位 m/s
-	judge_data.game_robot_status.shooter_id1_17mm_speed_limit = U8_Array_To_U16(&data_package[10]);
-	Shooter_Friction_Speed_Base_Limit(judge_data.game_robot_status.shooter_id1_17mm_speed_limit); //射速变更时，调整摩擦轮速度
-
-	//底盘功率上限
-	judge_data.game_robot_status.chassis_power_limit = U8_Array_To_U16(&data_package[24]);
-	
-	judge_data.game_robot_status.mains_power_shooter_output = (data_package[26] & 0x04) >> 2;
-
-	//模拟发射机构断电
-	if(judge_data.game_robot_status.mains_power_shooter_output)
-	{
-		POWER1_CTRL_ON;
-		POWER2_CTRL_ON;
-	}
-	else
-	{
-		POWER1_CTRL_OFF;
-		POWER2_CTRL_OFF;
-		Fric_Reset(); //重置摩擦轮
-	}
-
-	//DEBUG_SHOWDATA1("sout", judge_data.game_robot_status.mains_power_shooter_output);
-	//DEBUG_SHOWDATA1("gggglllll", judge_data.game_robot_status.chassis_power_limit);
-	
-	return 1;
-}
-
-//判断1号17mm发射机构是否超热量
+// 不该放这的函数，之后必须改掉
+// 判断1号17mm发射机构是否超热量
 u8 Is_Id1_17mm_Excess_Heat(const Judge_data_t* judge_data)
 {
-	if(judge_data->game_robot_status.shooter_id1_17mm_cooling_limit == 65535 || Get_Module_Online_State(5) == 0)
+	if(judge_data->ext_game_robot_status_t.shooter_id1_17mm_cooling_limit == 65535 || Get_Module_Online_State(5) == 0)
 	{
 		return 0;
 	}
-	if(judge_data->game_robot_status.shooter_id1_17mm_cooling_limit <= (judge_data->power_heat_data.shooter_id1_17mm_cooling_heat + 12 ))
+	if(judge_data->ext_game_robot_status_t.shooter_id1_17mm_cooling_limit <= (judge_data->power_heat_data.shooter_id1_17mm_cooling_heat + 12 ))
 	{
 		return 1;
 	}
