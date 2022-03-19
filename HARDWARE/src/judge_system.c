@@ -5,6 +5,7 @@
 #include "remoter_task.h"
 #include "shooter_task.h"
 #include "power_output.h"
+#include "detect_task.h"
 
 /* 裁判系统调试宏定义 */
 #if 0
@@ -56,7 +57,7 @@ static Judge_System_Connect_Item_Node judge_system_connect_root;
  * @param data_len 对应的数据帧长度
  * @param save_space 对应的数据存放空间（强烈建议使用官方裁判系统用户手册上提供的结构体）
  */
-void _Judge_System_Connect_Register(Judge_System_Connect_Item_Node *root, Judge_System_Connect_Item_Node *new_item, const uint16_t cmd_id, const uint16_t data_len, void *save_space)
+void _Judge_System_Connect_Register(Judge_System_Connect_Item_Node *root, Judge_System_Connect_Item_Node *new_item, const uint16_t cmd_id, const uint16_t data_len, void *save_space, void(*Callback)(unsigned short))
 {
 	// 头节点
 	Judge_System_Connect_Item_Node *node = root;
@@ -65,6 +66,7 @@ void _Judge_System_Connect_Register(Judge_System_Connect_Item_Node *root, Judge_
 	new_item->data.cmd_id = cmd_id;
 	new_item->data.data_len = data_len;
 	new_item->data.save_space = save_space;
+	new_item->data.Callback = Callback;
 	new_item->next = NULL;
 
 	// 将条目插入链表尾部
@@ -84,12 +86,13 @@ void Judge_System_Connect_List_Init(void)
 	// 头节点初始化
 	judge_system_connect_root.data.cmd_id = 0;
 	judge_system_connect_root.data.data_len = 0;
-	judge_system_connect_root.data.save_space = 0;
+	judge_system_connect_root.data.save_space = NULL;
+	judge_system_connect_root.data.Callback = NULL;
 	judge_system_connect_root.next = NULL;
 
 	// 添加解析节点
-	Judge_System_Connect_Item_Register(0x0201, 27, (void*)&judge_data.ext_game_robot_status_t);
-	Judge_System_Connect_Item_Register(0x0202, 16, (void*)&judge_data.ext_power_heat_data_t);
+	Judge_System_Connect_Item_Register(0x0201, 27, (void*)&judge_data.ext_game_robot_status_t, NULL);
+	Judge_System_Connect_Item_Register(0x0202, 16, (void*)&judge_data.ext_power_heat_data_t, NULL);
 }
 
 
@@ -175,7 +178,7 @@ void Find_All_A5(u8 *get_data, u16 data_len, u8 *r_position, u8 *r_a5_length)
  */
 uint8_t Analysis_Frame_Header(u8 *get_data, u16 *r_data_length, u8 *r_seq)
 {
-	JUDGE_ARRAY("head", get_data, 5);
+	// JUDGE_ARRAY("head", get_data, 5);
 	
 	//判断帧头的头是否为0xA5
 	if(get_data[0] != 0xA5)
@@ -253,6 +256,8 @@ uint8_t Analysis_Data(u8 *get_data, uint16_t data_len)
 			if (data_len == node->data.data_len)
 			{
 				memcpy(node->data.save_space, &get_data[7], data_len);
+				if(node->data.Callback != NULL)
+					node->data.Callback(cmd_id);
 				return 1u;
 			}
 			else

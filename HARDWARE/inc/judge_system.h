@@ -18,6 +18,7 @@ struct Judge_System_Connect_Item {
 	uint16_t cmd_id;
 	uint16_t data_len;
 	void* save_space;
+	void(*Callback)(unsigned short);
 };
 
 /**
@@ -29,16 +30,16 @@ typedef struct _Judge_System_Connect_Item_Node {
 	struct _Judge_System_Connect_Item_Node* next;
 }Judge_System_Connect_Item_Node;
 
-void _Judge_System_Connect_Register(Judge_System_Connect_Item_Node *root, Judge_System_Connect_Item_Node *new_item, const uint16_t cmd_id, const uint16_t data_len, void *save_space);
+void _Judge_System_Connect_Register(Judge_System_Connect_Item_Node *root, Judge_System_Connect_Item_Node *new_item, const uint16_t cmd_id, const uint16_t data_len, void *save_space, void(*Callback)(unsigned short));
 
 /**
  * @brief 裁判系统条目注册
  * 
  */
-#define Judge_System_Connect_Item_Register(cmd_id, data_len, save_space) \
+#define Judge_System_Connect_Item_Register(cmd_id, data_len, save_space, callback_func) \
 { \
 	static Judge_System_Connect_Item_Node new_connect_item = {0}; \
-	_Judge_System_Connect_Register(&judge_system_connect_root, &new_connect_item, cmd_id, data_len, save_space); \
+	_Judge_System_Connect_Register(&judge_system_connect_root, &new_connect_item, cmd_id, data_len, save_space, callback_func); \
 }
 
 typedef  struct
