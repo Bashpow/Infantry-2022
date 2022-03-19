@@ -8,11 +8,12 @@
 TaskHandle_t JudgeTask_Handler;
 
 static const uint8_t *judge_buf;
-static uint8_t judge_buf_copy[128];
+static uint8_t judge_buf_copy[256];
 static uint32_t judge_buf_len = 0;
 
 void Judge_Task(void *pvParameters)
 {
+	Judge_System_Connect_List_Init();
 	judge_buf = Get_Judge_Buf();
 	
 	vTaskDelay(200);
@@ -31,7 +32,7 @@ void Judge_Task(void *pvParameters)
 		Detect_Reload(5);
 		
 		//下一行是打印所有原始数据
-		//DEBUG_SHOWDATA1("judge_buf_len", judge_buf_len); for(u8 i=0; i<judge_buf_len; i++){DEBUG_PRINT("%d ", judge_buf_copy[i]);} DEBUG_PRINT("\r\n");
+		// DEBUG_SHOWDATA1("judge_buf_len", judge_buf_len); //for(u8 i=0; i<judge_buf_len; i++){DEBUG_PRINT("%d ", judge_buf_copy[i]);} DEBUG_PRINT("\r\n");
 		
 		//解析裁判系统数据
 		Analysis_Judge_System(judge_buf_copy, judge_buf_len);
