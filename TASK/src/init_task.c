@@ -15,20 +15,27 @@
 #include "buzzer.h"
 #include "shell.h"
 
-static void Print_Logo_2_Com(void);
+void Print_Dragon(void);
 
+/**
+ * @brief 外设初始化
+ * 
+ */
 void All_Init(void)
 {
 	NVIC_PriorityGroupConfig(NVIC_PriorityGroup_4);
 	
 	/* 初始化LED */
 	Led_Init();
+
 	/* 初始化蜂鸣器 */
 	Buzzer_Init();
+
 	/* 初始化串口3 */
 	Usart3_Init();
-	Print_Logo_2_Com();
-	INFO_PRINT("HLL 2021 New Infantry %s\r\n\r\n\r\n", VERSION);
+
+	/* 打印炫酷的LOGO */
+	Print_Dragon();
 
 	/* 初始化遥控器（串口1） */
 	Usart1_Init();
@@ -65,22 +72,23 @@ void All_Init(void)
 	/* Shell初始化 */
 	Shell_Init();
 
-	INFO_LOG("All peripheral init.\r\n");
 	Led_Flow_On();
 }
 
 
-static void Print_Logo_2_Com(void)
+/**
+ * @brief 打印一条炫酷的龙
+ * 
+ */
+void Print_Dragon(void)
 {
 	INFO_PRINT("\r\n");
-	INFO_PRINT("        *===*   *===*    *===*          *===*\r\n");
-	INFO_PRINT("       /   /   /   /    /   /          /   /\r\n");
-	INFO_PRINT("      /   *===*   /    /   /          /   /\r\n");
-	INFO_PRINT("     /           /    /   /          /   /\r\n");
-	INFO_PRINT("    /   *===*   /    /   *======*   /   *======*\r\n");
-	INFO_PRINT("   /   /   /   /    /          /   /          /\r\n");
-	INFO_PRINT("  *===*   *===*    *==========*   *==========*\r\n");
+	INFO_PRINT("     /\\_____/\\     \r\n");
+	INFO_PRINT("    /  o   o  \\    \r\n");
+	INFO_PRINT("   ( ==  ^  == )   \r\n");
+	INFO_PRINT("    )         (    \r\n");
+	INFO_PRINT("   (           )   \r\n");
+	INFO_PRINT("  ( (  )   (  ) )  \r\n");
+	INFO_PRINT(" (__(__)___(__)__) \r\n");
 	INFO_PRINT("\r\n");
 }
-
-
