@@ -15,7 +15,7 @@
 #include "buzzer.h"
 #include "shell.h"
 
-void Print_Dragon(void);
+void Print_Infantry(void);
 
 /**
  * @brief 外设初始化
@@ -34,8 +34,10 @@ void All_Init(void)
 	/* 初始化串口3 */
 	Usart3_Init();
 
-	/* 打印炫酷的LOGO */
-	Print_Dragon();
+	/* 打印 Infantry */
+	Print_Infantry();
+
+	INFO_LOG("Power on.");
 
 	/* 初始化遥控器（串口1） */
 	Usart1_Init();
@@ -72,6 +74,8 @@ void All_Init(void)
 	/* Shell初始化 */
 	Shell_Init();
 
+	INFO_LOG("Peripheral initialization succeeded.");
+
 	Led_Flow_On();
 }
 
@@ -80,15 +84,16 @@ void All_Init(void)
  * @brief 打印一条炫酷的龙
  * 
  */
-void Print_Dragon(void)
+void Print_Infantry(void)
 {
+	
+
 	INFO_PRINT("\r\n");
-	INFO_PRINT("     /\\_____/\\     \r\n");
-	INFO_PRINT("    /  o   o  \\    \r\n");
-	INFO_PRINT("   ( ==  ^  == )   \r\n");
-	INFO_PRINT("    )         (    \r\n");
-	INFO_PRINT("   (           )   \r\n");
-	INFO_PRINT("  ( (  )   (  ) )  \r\n");
-	INFO_PRINT(" (__(__)___(__)__) \r\n");
+	INFO_PRINT(" ___        __             _              \r\n");
+	INFO_PRINT("|_ _|_ __  / _| __ _ _ __ | |_ _ __ _   _ \r\n");
+	INFO_PRINT(" | || '_ \\| |_ / _` | '_ \\| __| '__| | | |\r\n");
+	INFO_PRINT(" | || | | |  _| (_| | | | | |_| |  | |_| |\r\n");
+	INFO_PRINT("|___|_| |_|_|  \\__,_|_| |_|\\__|_|   \\__, |\r\n");
+	INFO_PRINT("                                    |___/ \r\n");
 	INFO_PRINT("\r\n");
 }

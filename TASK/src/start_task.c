@@ -24,6 +24,8 @@ static TaskHandle_t CPU_Task_Handle = NULL;
 static void CPU_Task(void* parameter);
 #endif
 
+void Print_Dragon(void);
+
 void Start_Task(void *pvParameters)
 {
 	taskENTER_CRITICAL();           //进入临界区
@@ -127,14 +129,34 @@ void Start_Task(void *pvParameters)
 	#endif
 
 	Led_Flow_Off();
-	INFO_LOG("All tasks creat.\r\n");
+
+	INFO_LOG("Task created successfully.");
+
+	Print_Dragon();
 
 	taskEXIT_CRITICAL(); //退出临界区
-	INFO_LOG("System run.\r\n\r\n");
+
+	INFO_LOG("The system is normal.");
 	
 	vTaskDelete(NULL);  //删除开始任务
 }
 
+/**
+ * @brief 打印步兵字符串
+ * 
+ */
+void Print_Dragon(void)
+{
+	INFO_PRINT("\r\n");
+	INFO_PRINT("     /\\_____/\\     \r\n");
+	INFO_PRINT("    /  o   o  \\    \r\n");
+	INFO_PRINT("   ( ==  ^  == )   \r\n");
+	INFO_PRINT("    )         (    \r\n");
+	INFO_PRINT("   (           )   \r\n");
+	INFO_PRINT("  ( (  )   (  ) )  \r\n");
+	INFO_PRINT(" (__(__)___(__)__) \r\n");
+	INFO_PRINT("\r\n");
+}
 
 #if CHECK_CPU_USE
 static void CPU_Task(void* parameter)
