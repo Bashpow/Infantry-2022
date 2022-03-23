@@ -89,10 +89,13 @@ void Judge_System_Connect_List_Init(void)
 	judge_system_connect_root.data.save_space = NULL;
 	judge_system_connect_root.data.Callback = NULL;
 	judge_system_connect_root.next = NULL;
-
+ 
 	// 添加解析节点
+	Judge_System_Connect_Item_Register(0x0102, 4, (void*)&judge_data.ext_supply_projectile_action_t, NULL);
 	Judge_System_Connect_Item_Register(0x0201, 27, (void*)&judge_data.ext_game_robot_status_t, NULL);
 	Judge_System_Connect_Item_Register(0x0202, 16, (void*)&judge_data.ext_power_heat_data_t, NULL);
+	Judge_System_Connect_Item_Register(0x0204, 1, (void*)&judge_data.ext_buff_t, NULL);
+	Judge_System_Connect_Item_Register(0x0207, 7, (void*)&judge_data.ext_shoot_data_t, NULL);
 }
 
 

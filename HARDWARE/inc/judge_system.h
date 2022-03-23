@@ -78,7 +78,16 @@ typedef  struct
 		uint16_t shooter_id1_42mm_cooling_heat;
 	}power_heat_data;
 
-	// 0x0201
+	// cmd_id 0x0102
+	__packed struct
+	{
+		uint8_t supply_projectile_id;
+		uint8_t supply_robot_id;
+		uint8_t supply_projectile_step;
+		uint8_t supply_projectile_num;
+	} ext_supply_projectile_action_t;
+
+	// cmd_id 0x0201
 	__packed struct
 	{
 		uint8_t robot_id;
@@ -100,7 +109,7 @@ typedef  struct
 		uint8_t mains_power_shooter_output : 1;
 	} ext_game_robot_status_t;
 
-	// 0x0202
+	// cmd_id 0x0202
 	__packed struct
 	{
 		uint16_t chassis_volt;
@@ -111,6 +120,21 @@ typedef  struct
 		uint16_t shooter_id2_17mm_cooling_heat;
 		uint16_t shooter_id1_42mm_cooling_heat;
 	} ext_power_heat_data_t;
+
+	// cmd_id 0x0204
+	__packed struct
+	{
+		uint8_t power_rune_buff;
+	} ext_buff_t;
+
+	// 0x0207
+	__packed struct
+	{
+		uint8_t bullet_type;
+		uint8_t shooter_id;
+		uint8_t bullet_freq;
+		float bullet_speed;
+	} ext_shoot_data_t;
 
 	// ÆúÓÃ
 	__packed struct
