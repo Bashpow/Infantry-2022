@@ -1041,6 +1041,11 @@
               <FilePath>..\TASK\src\judge_task.c</FilePath>
             </File>
             <File>
+              <FileName>clientui_task.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\TASK\src\clientui_task.c</FilePath>
+            </File>
+            <File>
               <FileName>detect_task.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\TASK\src\detect_task.c</FilePath>
