@@ -10,6 +10,8 @@
 #include "shooter_task.h"
 #include "autoaim_task.h"
 #include "judge_task.h"
+#include "clientui_task.h"
+#include "settings_task.h"
 #include "detect_task.h"
 #include "shell_task.h"
 #include "string.h" //memset使用
@@ -93,6 +95,14 @@ void Start_Task(void *pvParameters)
 							(void*          )NULL,
 							(UBaseType_t    )9,
 							(TaskHandle_t*  )&JudgeTask_Handler);
+
+	//创建UI系统任务
+	xTaskCreate((TaskFunction_t )Clientui_Task,
+							(const char*    )"ui_task",   
+							(uint16_t       )1024,
+							(void*          )NULL,
+							(UBaseType_t    )9,
+							(TaskHandle_t*  )&ClientuiTask_Handler);
 							
 	//创建自瞄数据获取任务
 	xTaskCreate((TaskFunction_t )Autoaim_Task,
@@ -109,6 +119,14 @@ void Start_Task(void *pvParameters)
 							(void*          )NULL,
 							(UBaseType_t    )6,
 							(TaskHandle_t*  )&DetectTask_Handler);
+
+	//创建监听任务
+	xTaskCreate((TaskFunction_t )Settings_Task,     
+							(const char*    )"settings_task",   
+							(uint16_t       )256,
+							(void*          )NULL,
+							(UBaseType_t    )6,
+							(TaskHandle_t*  )&SettingsTask_Handler);
 
 	//创建Shell任务
 	xTaskCreate((TaskFunction_t )Shell_Task,     
