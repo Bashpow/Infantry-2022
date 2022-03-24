@@ -123,16 +123,15 @@ u8 Get_Rc_Available_Bufferx(void)
   ∑µªÿ÷µ£∫Œﬁ
 */
 void Usart1_DMA_Reset(void)
-{	
-	USART_Cmd(USART1, DISABLE);
+{
+	DMA_ITConfig(DMA2_Stream2, DMA_IT_TC, DISABLE);
 	DMA_Cmd(DMA2_Stream2, DISABLE);
-	DMA_SetCurrDataCounter(DMA2_Stream2, RC_RX_BUF_NUM);
-
-	//DMA_ClearFlag(DMA2_Stream2, DMA_FLAG_TCIF2);
-	DMA_ClearITPendingBit(DMA2_Stream5, DMA_IT_TCIF2);
-	
+	USART_Cmd(USART1, DISABLE);
+	DMA_SetCurrDataCounter(DMA2_Stream2, RC_RX_BUF_NUM);	
 	DMA_Cmd(DMA2_Stream2, ENABLE);
 	USART_Cmd(USART1, ENABLE);
+	DMA_ClearITPendingBit(DMA2_Stream5, DMA_IT_TCIF2);
+	DMA_ITConfig(DMA2_Stream2, DMA_IT_TC, ENABLE);
 }
 
 

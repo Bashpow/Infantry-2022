@@ -70,11 +70,10 @@ void Remoter_Task(void *pvParameters)
 	//开启串口1DMA接收完成中断
 	DMA_ITConfig(DMA2_Stream2, DMA_IT_TC, ENABLE);
 
-	while(1)
+	for(;;)
 	{
-		
 		//等待信号量，超时时间50ms
-		if( xSemaphoreTake(rc_data_update_semaphore, 500) == pdTRUE )
+		if( xSemaphoreTake(rc_data_update_semaphore, 100) == pdTRUE )
 		{
 			/* 获取当前遥控器可用原始数据 */
 			rx_available_bufx = Get_Rc_Available_Bufferx();
@@ -85,16 +84,16 @@ void Remoter_Task(void *pvParameters)
 			/* 检测遥控器数据，是否合法如果不合法采取操作 */
 			if(Remoter_Data_Check(&remote_controller))
 			{
+				//报错100
+				DEBUG_ERROR(100);
 				//保持当前遥控器数据不变
 				Rc_Data_Copy(&remote_controller, &last_time_rc);
 				//重置串口1及DMA
 				Usart1_DMA_Reset();
-				
-				DEBUG_ERROR(100);
 			}
 			
 			/* 更新遥控器状态 */
-			Detect_Reload(0);
+			Detect_Reload(REMOTE_CONTROL);
 			
 			/* 机器人模式变换响应 */
 			Robot_Rc_Mode_Change_Control();
@@ -115,6 +114,7 @@ void Remoter_Task(void *pvParameters)
 		{
 			Rc_Data_Reset(&remote_controller);
 			Rc_Data_Reset(&last_time_rc);
+			Usart1_DMA_Reset();
 		}
 		
 	}
