@@ -48,6 +48,7 @@ void Usart8_Init(void)
 
 	USART_Cmd(UART8, ENABLE);
 	USART_DMACmd(UART8, USART_DMAReq_Rx, ENABLE);
+	USART_DMACmd(UART8, USART_DMAReq_Tx, ENABLE);
 
 	/* DMA1流6 （串口8接收） */
 	DMA_DeInit(DMA1_Stream6);
@@ -69,7 +70,25 @@ void Usart8_Init(void)
 	DMA_InitStructure.DMA_PeripheralBurst = DMA_PeripheralBurst_Single;
 	DMA_Init(DMA1_Stream6, &DMA_InitStructure);
 
-	DMA_Cmd(DMA1_Stream6,ENABLE);
+	/* DMA1流0 （串口8发送） */
+	DMA_DeInit(DMA1_Stream0);
+	while (DMA_GetCmdStatus(DMA1_Stream0) != DISABLE);
+	DMA_InitStructure.DMA_Channel = DMA_Channel_5;
+	DMA_InitStructure.DMA_PeripheralBaseAddr = (uint32_t)&(UART8->DR);
+	DMA_InitStructure.DMA_Memory0BaseAddr = (uint32_t)NULL;
+	DMA_InitStructure.DMA_DIR = DMA_DIR_MemoryToPeripheral;
+	DMA_InitStructure.DMA_BufferSize = 0;
+	DMA_InitStructure.DMA_PeripheralInc = DMA_PeripheralInc_Disable;
+	DMA_InitStructure.DMA_MemoryInc = DMA_MemoryInc_Enable;
+	DMA_InitStructure.DMA_PeripheralDataSize = DMA_PeripheralDataSize_Byte;
+	DMA_InitStructure.DMA_MemoryDataSize = DMA_MemoryDataSize_Byte;
+	DMA_InitStructure.DMA_Mode = DMA_Mode_Normal;
+	DMA_InitStructure.DMA_Priority = DMA_Priority_High;
+	DMA_InitStructure.DMA_FIFOMode = DMA_FIFOMode_Disable;
+	DMA_InitStructure.DMA_FIFOThreshold = DMA_FIFOThreshold_1QuarterFull;
+	DMA_InitStructure.DMA_MemoryBurst = DMA_Mode_Normal;
+	DMA_InitStructure.DMA_PeripheralBurst = DMA_PeripheralBurst_Single;
+	DMA_Init(DMA1_Stream0, &DMA_InitStructure);
 }
 
 
@@ -111,3 +130,30 @@ u8 Get_Judge_Buf_Len(void)
 	return uart8_rx_length;
 }
 
+/**
+ * @brief 串口8（裁判系统）使用dma发送数据
+ * 
+ * @param tx_buffer_address 数据首地址
+ * @param tx_buffer_len 数据长度
+ * @return uint8_t 发送成功---1，发送失败---0
+ */
+uint8_t Uart8_Transmit_Start(uint32_t tx_buffer_address, uint16_t tx_buffer_len)
+{
+	if ( (0 != DMA_GetCurrDataCounter(DMA1_Stream0)) && (DMA_SxCR_EN == (DMA1_Stream0->CR | DMA_SxCR_EN)))
+	{
+		return 0;
+	}
+	DMA_Cmd(DMA1_Stream0, DISABLE);
+	DMA_ClearITPendingBit(DMA1_Stream0, DMA_IT_TCIF0);
+	if (0 != tx_buffer_address)
+	{
+		DMA1_Stream0->M0AR = tx_buffer_address;
+	}
+    else
+    {
+        return 0;
+    }
+	DMA_SetCurrDataCounter(DMA1_Stream0, tx_buffer_len);
+	DMA_Cmd(DMA1_Stream0, ENABLE);
+	return 1;
+}
