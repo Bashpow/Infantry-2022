@@ -1046,6 +1046,11 @@
               <FilePath>..\TASK\src\clientui_task.c</FilePath>
             </File>
             <File>
+              <FileName>settings_task.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\TASK\src\settings_task.c</FilePath>
+            </File>
+            <File>
               <FileName>detect_task.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\TASK\src\detect_task.c</FilePath>
