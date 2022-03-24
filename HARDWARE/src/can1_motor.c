@@ -72,7 +72,11 @@ void Set_Chassis_Motors_Speed(float speed_fl, float speed_fr, float speed_bl, fl
 }
 
 
-//超级电容功率设置
+/**
+ * @brief 超级电容功率设置
+ * 
+ * @param target_power 目标功率(W) = target_power/100
+ */
 void Set_Super_Capacitor(uint16_t target_power)
 {
 	Can_Send(1, SUPER_CAPACITOR_SEND_ID, target_power, 0, 0, 0);
