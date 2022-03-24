@@ -1,46 +1,25 @@
 #include "detect_task.h"
-
 #include "listen.h"
 #include "led.h"
 #include "usart3.h"
-#include "can1_motor.h"
-#include "judge_system.h"
 
 #define MODULE_REONLINE(index) (module_status[index].time_out_flag==0 && module_status[index].old_time_out_flag==1)
 #define MODULE_OFFLINE(index)  (module_status[index].time_out_flag==1 && module_status[index].old_time_out_flag==0)
 
-enum errorList
-{
-	remote_control = 0u, //遥控器
-	chassis_motor,       //底盘电机
-	gimbal_motor,        //云台电机
-	shooter_motor,       //发射机构电机
-	auto_aim,            //自瞄NUC
-	judge_system,        //裁判系统
-	super_capacitor,     //超级电容
-	gyroscope            //陀螺仪
-};
+static void Detect_Task_Init(void);
+
+// 分别代表8个模块
+static Module_status_t module_status[8];
 
 TaskHandle_t DetectTask_Handler;
-static Module_status_t module_status[8];
-static const Judge_data_t *judge_data;
-static const Super_capacitor_t *super_capacitor_data;
-
-static void Detect_Task_Init(void);
 
 void Detect_Task(void *pvParameters)
 {
 	Detect_Task_Init();
-
-	u8 cap_send_cnt = 5;
-	judge_data = Get_Judge_Data();
-	super_capacitor_data = Get_Super_Capacitor();
-
 	vTaskDelay(800);
 	
-	while(1)
+	for(;;)
 	{
-
 		for(u8 i=0; i<8; i++)
 		{
 			//各个模块状态刷新
@@ -56,93 +35,84 @@ void Detect_Task(void *pvParameters)
 				LED_FLOW_OFF(i);
 				INFO_LOG("Module%d Offline.\r\n\r\n", i);
 			}
-			
-		}
-		
-		//底盘功率设置
-		if(cap_send_cnt > 2)
-		{
-			/* 功率限制 */
-			if(module_status[judge_system].time_out_flag==0 && module_status[super_capacitor].time_out_flag==0)  //判断裁判系统、底盘是否同时上线
-			{
-				//判断超级电容目标功率与裁判系统限制功率-2是否相符，否设置超级电容
-				if((judge_data->game_robot_status.chassis_power_limit - 2) != ((uint16_t)(super_capacitor_data->target_power)))
-				{
-					Set_Super_Capacitor( (judge_data->game_robot_status.chassis_power_limit-2) * 100);
-					cap_send_cnt = 0;
-				}
-			}
-		}
-		else
-		{
-			cap_send_cnt++;
 		}
 		
 		LED_GREEN_TOGGLE;
-
 		vTaskDelay(250);
 	}
-	
-	
 	//vTaskDelete(NULL);
-	
 }
 
+/**
+ * @brief 各个模块初始化
+ * 
+ */
 static void Detect_Task_Init(void)
 {
-	for(u8 i=0; i<8; i++)
+	for(uint8_t i=0; i<8; i++)
 	{
 		Module_Status_Init(&module_status[i], 5, NULL, NULL);
 	}
-	
 	module_status[5].reload_cnt = 10;
-	
 }
 
-u8 Get_Module_Online_State(u8 id)
+/**
+ * @brief 获取模块在线状态
+ * 
+ * @param id 模块id
+ * @return uint8_t 模块在线---1u，模块离线---0u
+ */
+uint8_t Get_Module_Online_State(uint8_t id)
 {
-	// return (!module_status[id].time_out_flag);
-	if(module_status[id].time_out_flag == 0)
-	{
-		return 1;
-	}
-	else
-	{
-		return 0;
-	}
+	return Get_Module_State(&module_status[id]);
 }
 
-void Detect_Reload(u8 index)
+/**
+ * @brief 刷新模块
+ * 
+ * @param id 模块id
+ */
+void Detect_Reload(uint8_t id)
 {
-	Module_Status_Reload(&module_status[index]);
+	Module_Status_Reload(&module_status[id]);
 }
 
-void Classis_Reload(int8_t motor_index)
+
+/**
+ * @brief 刷新底盘电机状态
+ * 
+ * @param motor_index must be 0~3,分别对应底盘四个电机
+ */
+void Classis_Reload(const int8_t motor_index)
 {
-	static u8 chassis_motor[4] = {0, 0, 0, 0};
-	
-	if(motor_index>=0 && motor_index<=3)
+	// bit0-3对应4个电机
+	static uint8_t chassis_motor_state = 0u;
+
+	// 刷新对应bit
+	if (motor_index >= 0 && motor_index <= 3)
 	{
-		chassis_motor[motor_index] = 1;
+		chassis_motor_state |= (1u << motor_index);
 	}
 	else
 	{
 		return;
 	}
-	if(chassis_motor[0] && chassis_motor[1] && chassis_motor[2] && chassis_motor[3])
+	// 判断四轮是否都上线，若上线则刷新状态
+	if ((chassis_motor_state & 0x0F) == 0x0F)
 	{
-		chassis_motor[0] = 0;
-		chassis_motor[1] = 0;
-		chassis_motor[2] = 0;
-		chassis_motor[3] = 0;
-		Module_Status_Reload(&module_status[1]);
+		chassis_motor_state = 0;
+		Module_Status_Reload(&module_status[CHASSIS_MOTOR]);
 	}
 }
 
+/**
+ * @brief 刷新云台电机状态
+ * 
+ * @param motor_index must be 0~1,分别对应底盘两个电机
+ */
 void Gimbal_Reload(int8_t motor_index)
 {
-	static u8 gimbal_motor[2] = {0, 0};
-	
+	static uint8_t gimbal_motor[2] = {0, 0};
 	if(motor_index>=0 && motor_index<=1)
 	{
 		gimbal_motor[motor_index] = 1;
@@ -155,11 +125,6 @@ void Gimbal_Reload(int8_t motor_index)
 	{
 		gimbal_motor[0] = 0;
 		gimbal_motor[1] = 0;
-		Module_Status_Reload(&module_status[2]);
+		Module_Status_Reload(&module_status[GIMBAL_MOTOR]);
 	}
-}
-
-void Shooter_Reload(void)
-{
-	Module_Status_Reload(&module_status[3]);
 }

@@ -18,5 +18,6 @@ typedef struct
 void Module_Status_Init(Module_status_t* self, u8 cnt_num, void On_Hook(void), void Off_Hook(void));
 void Module_Status_Listen(Module_status_t* self);
 void Module_Status_Reload(Module_status_t* self);
+uint8_t Get_Module_State(const Module_status_t* self);
 
 #endif

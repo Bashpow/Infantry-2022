@@ -111,7 +111,7 @@ static void Can2_Hook(CanRxMsg *rx_message)
 			Calculate_Motor_Data(&shooter_wave_motor, rx_message);
 			
 			//¼ÇÂ¼Ê±¼ä
-			Shooter_Reload();
+			Detect_Reload(SHOOTER_MOTOR);
 			break;
 		}
 		
