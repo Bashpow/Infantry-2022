@@ -8,15 +8,16 @@
 
 typedef struct
 {
-	u8 identifie_ready; //识别成功， 2识别失败
-	
+	uint8_t identifie_ready; //识别成功， 2识别失败
 	uint16_t x_yaw;
 	uint16_t y_pitch;
+	uint16_t target_color;
 }Auto_aim_t;
 
 void Auto_Aim_Init(void);
 const Auto_aim_t* Get_Auto_Aim_Msg(void);
 void Reset_Auto_Aim_Msg(void);
-void Auto_Aim_Calc(void);
+void Set_Target_Color(uint16_t target_color);
+uint8_t Auto_Aim_Calc(void);
 
 #endif

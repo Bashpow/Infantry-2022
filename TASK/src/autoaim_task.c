@@ -4,28 +4,32 @@
 #include "math2.h"
 #include "detect_task.h"
 #include "pid.h"
-
-TaskHandle_t AutoaimTask_Handler;
+#include "usart3.h"
+#include "usart6.h"
 
 static SemaphoreHandle_t autoaim_data_update_semaphore;  //串口1DMA接收信号量
+
+TaskHandle_t AutoaimTask_Handler;
 
 void Autoaim_Task(void *pvParameters)
 {
 	autoaim_data_update_semaphore = xSemaphoreCreateBinary();
-
 	vTaskDelay(200);
-
 	DMA_ITConfig(DMA2_Stream1, DMA_IT_TC, ENABLE); //开启中断
-	
-	while(1)
+	for(;;)
 	{
 		if( xSemaphoreTake(autoaim_data_update_semaphore, 500) == pdTRUE )
 		{
-			//更新自瞄数据
-			Auto_Aim_Calc();
-			
-			//更新陀螺仪状态
-			Detect_Reload(4);
+			if(Auto_Aim_Calc())
+			{
+				//更新陀螺仪状态
+				Detect_Reload(AUTO_AIM);
+			}
+			else
+			{
+				DEBUG_ERROR(601);
+				Usart6_DMA_Reset();
+			}
 		}
 		else
 		{
