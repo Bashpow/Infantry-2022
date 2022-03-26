@@ -4,6 +4,10 @@
 
 static u8 usart6_rx_buf[10];
 
+/**
+ * @brief 串口6初始化
+ * 
+ */
 void Usart6_Init(void)
 {
 	GPIO_InitTypeDef GPIO_InitStructure;
@@ -79,18 +83,45 @@ void DMA2_Stream1_IRQHandler(void)
 	}
 }
 
+/**
+ * @brief 串口6DMA重置
+ * 
+ */
 void Usart6_DMA_Reset(void)
 {
+	DMA_ITConfig(DMA2_Stream1, DMA_IT_TC, DISABLE);
 	USART_Cmd(USART6, DISABLE); 
 	DMA_Cmd(DMA2_Stream1, DISABLE);
 	DMA_SetCurrDataCounter(DMA2_Stream1, 10);
 	DMA_ClearFlag(DMA2_Stream1, DMA_FLAG_TCIF1);
 	DMA_Cmd(DMA2_Stream1, ENABLE);
 	USART_Cmd(USART6, ENABLE);
+	DMA_ITConfig(DMA2_Stream1, DMA_IT_TC, ENABLE);
 }
 
+/**
+ * @brief 获取串口6获得的原始数据
+ * 
+ * @return const uint8_t* 原始数据头指针，长度固定为 10 Byte
+ */
 const uint8_t *Get_Usart6_Rx_Buf(void)
 {
 	return usart6_rx_buf;
 }
 
+/**
+ * @brief 串口6发送数据
+ * 
+ * @param buffer 数据头指针
+ * @param len 数据长度
+ */
+void Usart6_Send_Buf(uint8_t *buffer, uint32_t len)
+{
+	for (uint32_t i = 0; i < len; i++)
+	{
+		while ((USART6->SR & 0X40) == 0)
+		{
+		}
+		USART6->DR = buffer[i];
+	}
+}
