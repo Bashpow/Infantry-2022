@@ -921,6 +921,11 @@
               <FilePath>..\HARDWARE\src\remoter.c</FilePath>
             </File>
             <File>
+              <FileName>gyroscope.c</FileName>
+              <FileType>1</FileType>
+              <FilePath>..\HARDWARE\src\gyroscope.c</FilePath>
+            </File>
+            <File>
               <FileName>autoaim.c</FileName>
               <FileType>1</FileType>
               <FilePath>..\HARDWARE\src\autoaim.c</FilePath>
