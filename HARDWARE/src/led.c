@@ -79,7 +79,17 @@ void Led_Flow_On(void)
 	delay_ms(30);
 	LED_RED_ON;
 	delay_ms(30);
-	for(int i=0; i<8; i++)
+	// for(int i=0; i<8; i++)
+	// {
+	// 	LED_FLOW_ON(i);
+	// 	delay_ms(30);
+	// }
+	for(int8_t i=0; i<7; i+=2)
+	{
+		LED_FLOW_ON(i);
+		delay_ms(30);
+	}
+	for(int8_t i=1; i<8; i+=2)
 	{
 		LED_FLOW_ON(i);
 		delay_ms(30);
@@ -88,7 +98,17 @@ void Led_Flow_On(void)
 
 void Led_Flow_Off(void)
 {
-	for(u8 i=0; i<8; i++)
+	// for(u8 i=0; i<8; i++)
+	// {
+	// 	LED_FLOW_OFF(i);
+	// 	delay_ms(30);
+	// }
+	for(u8 i=0; i<7; i+=2)
+	{
+		LED_FLOW_OFF(i);
+		delay_ms(30);
+	}
+	for(u8 i=1; i<8; i+=2)
 	{
 		LED_FLOW_OFF(i);
 		delay_ms(30);
