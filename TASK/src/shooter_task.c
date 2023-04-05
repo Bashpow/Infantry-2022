@@ -4,6 +4,7 @@
 #include "timer2.h"
 #include "pid.h"
 #include "can2_motor.h"
+#include "power_output.h"
 #include "remoter_task.h"
 #include "buzzer_task.h"
 #include "detect_task.h"
@@ -56,7 +57,7 @@ void Shooter_Task(void *pvParameters)
 
 	vTaskDelay(200);
 	
-	while(1)
+	for(;;)
 	{
 		
 		/* 摩擦轮速度模式,弹舱开关 */
@@ -65,22 +66,27 @@ void Shooter_Task(void *pvParameters)
 			case 0:
 				friction_speed = FRICTION_STOP;
 				COVER_CLOSE();
+				LASER_OFF;
 				break;
 			case 1:
 				friction_speed = FRICTION_SPEED_1;
 				COVER_CLOSE();
+				LASER_ON;
 				break;
 			case 2:
 				friction_speed = FRICTION_SPEED_2;
 				COVER_CLOSE();
+				LASER_ON;
 				break;
 			case 3:
 				friction_speed = FRICTION_STOP;
 				COVER_OPEN();
+				LASER_OFF;
 				break;
 			default:
 				friction_speed = 0;
 				COVER_CLOSE();
+				LASER_OFF;
 				break;
 		}
 		
