@@ -6,14 +6,14 @@
 #include "detect_task.h"
 #include "cansend_task.h"
 
-static Motor_measure_t friction_wheel_up_motor; // ï¿½ï¿½Ä¦ï¿½ï¿½ï¿½Öµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½?
-static Motor_measure_t friction_wheel_down_motor; // ï¿½ï¿½Ä¦ï¿½ï¿½ï¿½Öµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½?
+static Motor_measure_t friction_wheel_up_motor; // ï¿½ï¿½Ä¦ï¿½ï¿½ï¿½Öµï¿½ï¿½ï¿½ï¿½ï¿½ï¿??
+static Motor_measure_t friction_wheel_down_motor; // ï¿½ï¿½Ä¦ï¿½ï¿½ï¿½Öµï¿½ï¿½ï¿½ï¿½ï¿½ï¿??
 static Pid_Position_t friction_wheel_up_motor_speed_pid = NEW_POSITION_PID(10.8, 0.8, 0.2, 2000, 10000, 0, 1000, 500); //ï¿½ï¿½ï¿½ï¿½ï¿½Ù¶ï¿½PID
 static Pid_Position_t friction_wheel_down_motor_speed_pid = NEW_POSITION_PID(10.8, 0.8, 0.2, 2000, 10000, 0, 1000, 500); //ï¿½ï¿½ï¿½ï¿½ï¿½Ù¶ï¿½PID
 
-/* ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ */
-static Motor_measure_t shooter_wave_motor; //ï¿½ï¿½ï¿½Öµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
-static Motor_measure_t gimbal_motor[2]; //ï¿½ï¿½Ì¨ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+/* ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿? */
+static Motor_measure_t shooter_wave_motor; //ï¿½ï¿½ï¿½Öµï¿½ï¿½ï¿½ï¿½ï¿½ï¿?
+static Motor_measure_t gimbal_motor[2]; //ï¿½ï¿½Ì¨ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿?
 
 static Pid_Position_t motor_wave_speed_pid = NEW_POSITION_PID(10.8, 0.8, 0.2, 2000, 10000, 0, 1000, 500); //ï¿½ï¿½ï¿½ï¿½ï¿½Ù¶ï¿½PID
 
@@ -58,7 +58,7 @@ void CAN2_RX0_IRQHandler(void)
 	
 }
 
-//ï¿½ï¿½ï¿½ã·¢ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Öµï¿½ï¿½ï¿½Ù¶ï¿½PIDï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+//ï¿½ï¿½ï¿½ã·¢ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Öµï¿½ï¿½ï¿½Ù¶ï¿½PIDï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿?
 void Set_Shooter_Wave_Motors_Speed(float wave_wheel, float up_firction_speed, float down_firction_speed)
 {
 	Can_Send(2,
@@ -71,7 +71,7 @@ void Set_Shooter_Wave_Motors_Speed(float wave_wheel, float up_firction_speed, fl
 			 					friction_wheel_down_motor.speed_rpm));
 }
 
-//ï¿½ï¿½È¡ï¿½ï¿½Ì¨2ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö¸ï¿½ï¿½
+//ï¿½ï¿½È¡ï¿½ï¿½Ì¨2ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ö¸ï¿½ï¿?
 const Motor_measure_t *Get_Gimbal_Motor(void)
 {
     return gimbal_motor;
@@ -81,15 +81,13 @@ const Motor_measure_t *Get_Shooter_Wave_Motor(void)
 {
     return &shooter_wave_motor;
 }
-Motor_measure_t *Get_Firction_M3508_Up_Motor(void)
-{
+Motor_measure_t *Get_Firction_M3508_Up_Motor(void) {
     return &friction_wheel_up_motor;
 }
-
-Motor_measure_t *Get_Firction_M3508_Down_Motor(void)
-{
+Motor_measure_t *Get_Firction_M3508_Down_Motor(void) {
     return &friction_wheel_down_motor;
 }
+
 //ï¿½ï¿½ï¿½ï¿½ï¿½Ù¶ï¿½PIDï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 void Set_Gimbal_Motors_Speed(float speed_yaw, float speed_pitch)
 {
@@ -127,44 +125,32 @@ static void Can2_Hook(CanRxMsg *rx_message)
 {
 	switch (rx_message->StdId)
 	{
+		// ·¢Éä»ú¹¹3¸öµç»ú
 		case CAN_3508_FRICTION_WHEEL_UP_ID:
-		{
 			Calculate_Motor_Data(&friction_wheel_up_motor, rx_message);
+			Shooter_Reload(0);
 			break;
-		}
 		case CAN_3508_FRICTION_WHEEL_DOWN_ID:
-		{
 			Calculate_Motor_Data(&friction_wheel_down_motor, rx_message);
+			Shooter_Reload(1);
 			break;
-		}
-
 		case CAN_3508_WAVE_ID:
-		{
-			//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ýºêº¯ï¿½ï¿½
 			Calculate_Motor_Data(&shooter_wave_motor, rx_message);
-			
-			//ï¿½ï¿½Â¼Ê±ï¿½ï¿½
-			Detect_Reload(SHOOTER_MOTOR);
+			Shooter_Reload(2);
 			break;
-		}
 		
 		case CAN_YAW_MOTOR_ID:
 		case CAN_PITCH_MOTOR_ID:
 		{
 			uint8_t i = 0;
-			//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½IDï¿½ï¿½
 			i = rx_message->StdId - CAN_YAW_MOTOR_ID;
-			//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ýºêº¯ï¿½ï¿½
 			Calculate_Motor_Data(&gimbal_motor[i], rx_message);
-			//ï¿½ï¿½Â¼Ê±ï¿½ï¿½
 			Gimbal_Reload(i);
 			break;
 		}
 		
 		default:
-		{
 			break;
-		}
 	}
 }
 

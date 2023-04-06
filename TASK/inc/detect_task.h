@@ -23,5 +23,6 @@ uint8_t Get_Module_Online_State(uint8_t id);
 void Detect_Reload(uint8_t index);
 void Classis_Reload(int8_t motor_index);
 void Gimbal_Reload(int8_t motor_index);
+void Shooter_Reload(const int8_t motor_index);
 
 #endif

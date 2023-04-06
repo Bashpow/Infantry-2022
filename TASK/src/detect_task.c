@@ -128,3 +128,22 @@ void Gimbal_Reload(int8_t motor_index)
 		Module_Status_Reload(&module_status[GIMBAL_MOTOR]);
 	}
 }
+
+/**
+ * @brief 刷新发射机构3电机状态
+ * 
+ * @param motor_index must be 0~2,分别对应3个电机
+ */
+void Shooter_Reload(const int8_t motor_index)
+{
+	static uint8_t shooter_motor_state = 0u; // bit0-3对应4个电机
+	if (motor_index >= 0 && motor_index <= 2) {
+		shooter_motor_state |= (1u << motor_index); // 刷新对应bit
+	} else {
+		return;
+	}	
+	if ((shooter_motor_state & 0x07) == 0x07) { // 判断四轮是否都上线，若上线则刷新状态
+		shooter_motor_state = 0;
+		Module_Status_Reload(&module_status[SHOOTER_MOTOR]);
+	}
+}
