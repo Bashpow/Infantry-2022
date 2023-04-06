@@ -65,6 +65,7 @@ void Wt61c_Task(void *pvParameters)
 			{
 				Uart7_DMA_Reset();
 				INFO_LOG("WT61C error.\r\n");
+				vTaskDelay(2);
 			}
 			
 		}
