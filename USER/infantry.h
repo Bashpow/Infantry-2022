@@ -1,4 +1,4 @@
-//ÓÃÓÚ´æ·ÅÈ«¾Öºê¶¨Òå
+//ï¿½ï¿½ï¿½Ú´ï¿½ï¿½È«ï¿½Öºê¶¨ï¿½ï¿½
 
 #ifndef __INFANTRY_H
 #define __INFANTRY_H
@@ -6,9 +6,9 @@
 #include "stm32f4xx.h"
 #include "usart3.h"
 
-#define VERSION "1.1"
+#define VERSION "1.12"
 
-//ÔÆÌ¨GM6020µç»úÍ·½Ç¶È
-#define YAW_GM6020_HEAD_ANGLE 5450
+//ï¿½ï¿½Ì¨GM6020ï¿½ï¿½ï¿½Í·ï¿½Ç¶ï¿½
+#define YAW_GM6020_HEAD_ANGLE 2256
 
 #endif

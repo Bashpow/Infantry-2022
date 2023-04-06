@@ -25,7 +25,11 @@ static Pid_Position_t motor_pitch_angle_pid = NEW_POSITION_PID(0.25, 0.018, 0.00
 
 /* �������� */
 static void Can2_Hook(CanRxMsg *rx_message);
-
+static CanRxMsg can2_rx_msg;
+CanRxMsg *GetCan2_RXD_Msg(void)
+{
+	return &can2_rx_msg;
+}
 /* CAN1 send and receive ID wheel_left */
 typedef enum
 {
@@ -44,7 +48,7 @@ typedef enum
 
 void CAN2_RX0_IRQHandler(void)
 {
-	static CanRxMsg can2_rx_msg;
+
 	if (CAN_GetITStatus(CAN2,CAN_IT_FMP0)!= RESET)
 	{ 
 		CAN_ClearITPendingBit(CAN2, CAN_IT_FF0);

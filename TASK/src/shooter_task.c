@@ -59,7 +59,8 @@ void Shooter_Task(void *pvParameters)
 	firction_m3508_down_wheel = Get_Firction_M3508_Down_Motor();
 	const Rc_ctrl_t *rc_pt = Get_Remote_Control_Point();
 	vTaskDelay(200);
-	
+	CanRxMsg *can2_rx_msg = GetCan2_RXD_Msg();
+
 	for(;;)
 	{
 		
@@ -155,7 +156,7 @@ void Shooter_Task(void *pvParameters)
 		// firction_m3508_down_wheel->mechanical_angle,firction_m3508_down_wheel->speed_rpm);
 		/* ���ò����ٶ� */
 		Set_Shooter_Wave_Motors_Speed(wave_speed ,up_speed, down_speed);
-		
+		// printf("id: %d; \r\n",can2_rx_msg->StdId);
 		vTaskDelay(5);  //100HZ  ����1/10s 3����(10������)
 	}
 	
