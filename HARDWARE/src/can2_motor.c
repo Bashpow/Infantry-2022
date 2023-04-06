@@ -8,6 +8,8 @@
 
 static Motor_measure_t friction_wheel_up_motor; // ��Ħ���ֵ������?
 static Motor_measure_t friction_wheel_down_motor; // ��Ħ���ֵ������?
+static Pid_Position_t friction_wheel_up_motor_speed_pid = NEW_POSITION_PID(10.8, 0.8, 0.2, 2000, 10000, 0, 1000, 500); //�����ٶ�PID
+static Pid_Position_t friction_wheel_down_motor_speed_pid = NEW_POSITION_PID(10.8, 0.8, 0.2, 2000, 10000, 0, 1000, 500); //�����ٶ�PID
 
 /* ������� */
 static Motor_measure_t shooter_wave_motor; //���ֵ������
@@ -53,14 +55,16 @@ void CAN2_RX0_IRQHandler(void)
 }
 
 //���㷢��������ֵ���ٶ�PID�������
-void Set_Shooter_Wave_Motors_Speed(float wave_wheel)
+void Set_Shooter_Wave_Motors_Speed(float wave_wheel, float up_firction_speed, float down_firction_speed)
 {
 	Can_Send(2,
 			 CAN_SHOOTER_ALL_ID,
 			 Pid_Position_Calc(&motor_wave_speed_pid, wave_wheel, shooter_wave_motor.speed_rpm),
 			 0,
-			 0,
-			 0);
+			 Pid_Position_Calc(&friction_wheel_up_motor_speed_pid,
+			 					up_firction_speed, friction_wheel_up_motor.speed_rpm),
+			 Pid_Position_Calc(&friction_wheel_down_motor_speed_pid, down_firction_speed, 
+			 					friction_wheel_down_motor.speed_rpm));
 }
 
 //��ȡ��̨2���������ָ��
@@ -73,12 +77,12 @@ const Motor_measure_t *Get_Shooter_Wave_Motor(void)
 {
     return &shooter_wave_motor;
 }
-const Motor_measure_t *Get_Firction_M3508_Up_Motor(void)
+Motor_measure_t *Get_Firction_M3508_Up_Motor(void)
 {
     return &friction_wheel_up_motor;
 }
 
-const Motor_measure_t *Get_Firction_M3508_Down_Motor(void)
+Motor_measure_t *Get_Firction_M3508_Down_Motor(void)
 {
     return &friction_wheel_down_motor;
 }

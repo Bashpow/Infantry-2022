@@ -57,7 +57,7 @@ void Shooter_Task(void *pvParameters)
 	judge_data = Get_Judge_Data();
 	firction_m3508_up_wheel = Get_Firction_M3508_Up_Motor();
 	firction_m3508_down_wheel = Get_Firction_M3508_Down_Motor();
-
+	const Rc_ctrl_t *rc_pt = Get_Remote_Control_Point();
 	vTaskDelay(200);
 	
 	for(;;)
@@ -148,8 +148,13 @@ void Shooter_Task(void *pvParameters)
 		T_PWM_OUT(friction_speed);
 		U_PWM_OUT(friction_speed);
 
+		float up_speed = rc_pt->rc.ch0;
+		float down_speed = rc_pt->rc.ch1;
+		// printf("ch1: %d, ch2: %d\r\n",rc_pt->rc.ch0, rc_pt->rc.ch1);
+		// printf("%d %d %d %d\r\n", firction_m3508_up_wheel->mechanical_angle, firction_m3508_up_wheel->speed_rpm,
+		// firction_m3508_down_wheel->mechanical_angle,firction_m3508_down_wheel->speed_rpm);
 		/* ���ò����ٶ� */
-		Set_Shooter_Wave_Motors_Speed(wave_speed);
+		Set_Shooter_Wave_Motors_Speed(wave_speed ,up_speed, down_speed);
 		
 		vTaskDelay(5);  //100HZ  ����1/10s 3����(10������)
 	}
