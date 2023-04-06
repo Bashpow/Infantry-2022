@@ -9,7 +9,7 @@ static uint8_t client_ui_send_buffer[128];
 
 // 静态字符、图像
 static Graph_Data static_graph;
-static String_Data static_char;
+// static String_Data static_char;
 
 // 动态字符、图像
 static Graph_Data cap_voltage_float; //超级电容电压
@@ -28,7 +28,13 @@ void Clientui_Task(void *pvParameters)
 
 	// 设置对应的机器人ID
 	// 判断裁判系统是否在线
-	UI_Set_Comparable_Id(Get_Judge_Data()->ext_game_robot_status_t.robot_id);
+	for(;;) {
+		vTaskDelay(300);
+		UI_Set_Comparable_Id(Get_Judge_Data()->ext_game_robot_status_t.robot_id);
+		if(0) { //TODO:如果裁判系统在线且按下了按键{}
+			break;
+		}
+	}
 	
 	// 清除所有
 	UI_Delete(client_ui_send_buffer, UI_Data_Del_ALL, 0);
