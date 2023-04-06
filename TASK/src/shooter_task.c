@@ -32,35 +32,38 @@
 
 #define CALC_FRICTION_SPEED_PID() Pid_Position_Calc(&motor_friction_speed_pid, ((float)(judge_data->game_robot_status.shooter_id1_17mm_speed_limit) - 2.0f), judge_data->shoot_data.bullet_speed)
 
-//±äÁ¿¶¨Òå
+//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 TaskHandle_t ShooterTask_Handler;
 static uint8_t shoot_key = 0;
 static int16_t shooter_friction_speed = 1170;
 const static Robot_mode_t* shooter_robot_mode;
 const static Judge_data_t* judge_data;
-static Pid_Position_t motor_friction_speed_pid = NEW_POSITION_PID(2.0f, 0.1, 0, 8, 12, 0, 1000, 500); //²¨ÂÖËÙ¶ÈPID
+static Pid_Position_t motor_friction_speed_pid = NEW_POSITION_PID(2.0f, 0.1, 0, 8, 12, 0, 1000, 500); //ï¿½ï¿½ï¿½ï¿½ï¿½Ù¶ï¿½PID
 static int16_t motor_friction_speed_max;
-
-//º¯ÊýÉùÃ÷
+Motor_measure_t *firction_m3508_up_wheel;
+Motor_measure_t *firction_m3508_down_wheel;
+//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 static void Shoot_End_Friction_Speed_Subtract(uint16_t minus_speed);
 
 void Shooter_Task(void *pvParameters)
 {
-	int16_t wave_speed = 0;  //²¨ÂÖËÙ¶È
-	int16_t friction_speed = 0;  //Ä¦²ÁÂÖËÙ¶È
+	int16_t wave_speed = 0;  //ï¿½ï¿½ï¿½ï¿½ï¿½Ù¶ï¿½
+	int16_t friction_speed = 0;  //Ä¦ï¿½ï¿½ï¿½ï¿½ï¿½Ù¶ï¿½
 	
-	uint8_t shoot_count = 0;  //µ¥·¢ÈýÁ¬·¢¼ÆÊý
-	uint8_t shooting_sign = 0;  //Éä»÷±êÖ¾
+	uint8_t shoot_count = 0;  //ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
+	uint8_t shooting_sign = 0;  //ï¿½ï¿½ï¿½ï¿½ï¿½Ö¾
 
 	shooter_robot_mode = Get_Robot_Mode_Point();
 	judge_data = Get_Judge_Data();
+	firction_m3508_up_wheel = Get_Firction_M3508_Up_Motor();
+	firction_m3508_down_wheel = Get_Firction_M3508_Down_Motor();
 
 	vTaskDelay(200);
 	
 	for(;;)
 	{
 		
-		/* Ä¦²ÁÂÖËÙ¶ÈÄ£Ê½,µ¯²Õ¿ª¹Ø */
+		/* Ä¦ï¿½ï¿½ï¿½ï¿½ï¿½Ù¶ï¿½Ä£Ê½,ï¿½ï¿½ï¿½Õ¿ï¿½ï¿½ï¿½ */
 		switch( FRIC_COVER_MODE )
 		{
 			case 0:
@@ -90,7 +93,7 @@ void Shooter_Task(void *pvParameters)
 				break;
 		}
 		
-		/* ´¦ÀíÉä»÷°´Å¥ */
+		/* ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Å¥ */
 		if( FRIC_COVER_MODE==1 ||  FRIC_COVER_MODE==2)
 		{
 			if(shoot_count == 0)
@@ -141,14 +144,14 @@ void Shooter_Task(void *pvParameters)
 			wave_speed=0;
 		}
 		
-		/* ÉèÖÃÄ¦²ÁÂÖ */
+		/* ï¿½ï¿½ï¿½ï¿½Ä¦ï¿½ï¿½ï¿½ï¿½ */
 		T_PWM_OUT(friction_speed);
 		U_PWM_OUT(friction_speed);
 
-		/* ÉèÖÃ²¨ÂÖËÙ¶È */
+		/* ï¿½ï¿½ï¿½Ã²ï¿½ï¿½ï¿½ï¿½Ù¶ï¿½ */
 		Set_Shooter_Wave_Motors_Speed(wave_speed);
 		
-		vTaskDelay(5);  //100HZ  ÉäËÙ1/10s 3Á¬·¢(10¸öÖÜÆÚ)
+		vTaskDelay(5);  //100HZ  ï¿½ï¿½ï¿½ï¿½1/10s 3ï¿½ï¿½ï¿½ï¿½(10ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½)
 	}
 	
 	//vTaskDelete(NULL);
@@ -163,7 +166,7 @@ static uint16_t Shooter_Friction_Speed_To_Pwm(float speed)
 	return (uint16_t)pwm;
 }
 
-//Éä»÷½áÊø£¨ËÉ¿ªÊó±ê×ó¼ü£©Ä¦²ÁÂÖËÙ¶È½µµÍ
+//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½É¿ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä¦ï¿½ï¿½ï¿½ï¿½ï¿½Ù¶È½ï¿½ï¿½ï¿½
 static void Shoot_End_Friction_Speed_Subtract(uint16_t minus_speed)
 {
 	if(Get_Module_Online_State(5))
@@ -175,14 +178,14 @@ static void Shoot_End_Friction_Speed_Subtract(uint16_t minus_speed)
 	}
 }
 
-//ÉèÖÃÉä»÷°´Å¥
+//ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Å¥
 void Set_Shoot_key(u8 key)
 {
 	shoot_key = key;
 }
 
 #define SHOOTER_FRICTION_SPEED_TO_PWM(speed)  Shooter_Friction_Speed_To_Pwm(speed)
-//ÔÚ²ÃÅÐÏµÍ³ÊÕµ½×Óµ¯ËÙ¶ÈÏÞÖÆÊ±µ÷ÓÃ£¨ËùÒÔ²»ÓÃÅÐ¶Ï²ÃÅÐÏµÍ³ÊÇ·ñÔÚÏß£©£¬ÔÚ×Óµ¯ËÙ¶ÈÏÞÖÆ±ä¸üÊ±µ÷ÕûÄ¦²ÁÂÖËÙ¶È
+//ï¿½Ú²ï¿½ï¿½ï¿½ÏµÍ³ï¿½Õµï¿½ï¿½Óµï¿½ï¿½Ù¶ï¿½ï¿½ï¿½ï¿½ï¿½Ê±ï¿½ï¿½ï¿½Ã£ï¿½ï¿½ï¿½ï¿½Ô²ï¿½ï¿½ï¿½ï¿½Ð¶Ï²ï¿½ï¿½ï¿½ÏµÍ³ï¿½Ç·ï¿½ï¿½ï¿½ï¿½ß£ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Óµï¿½ï¿½Ù¶ï¿½ï¿½ï¿½ï¿½Æ±ï¿½ï¿½Ê±ï¿½ï¿½ï¿½ï¿½Ä¦ï¿½ï¿½ï¿½ï¿½ï¿½Ù¶ï¿½
 void Shooter_Friction_Speed_Base_Limit(uint16_t speed_limit)
 {
 	static uint16_t last_speed_limit = 0;
@@ -196,7 +199,7 @@ void Shooter_Friction_Speed_Base_Limit(uint16_t speed_limit)
 	}
 }
 
-//ÔÚ²ÃÅÐÏµÍ³ÊÕµ½·¢ÉäÊý¾Ýºóµ÷ÓÃ£¨ËùÒÔ²»ÓÃÅÐ¶Ï²ÃÅÐÏµÍ³ÊÇ·ñÔÚÏß£©,ÓÃÓÚ¶¯Ì¬ÏÞÖÆ·¢Éä×Óµ¯ËÙ¶È
+//ï¿½Ú²ï¿½ï¿½ï¿½ÏµÍ³ï¿½Õµï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ýºï¿½ï¿½ï¿½Ã£ï¿½ï¿½ï¿½ï¿½Ô²ï¿½ï¿½ï¿½ï¿½Ð¶Ï²ï¿½ï¿½ï¿½ÏµÍ³ï¿½Ç·ï¿½ï¿½ï¿½ï¿½ß£ï¿½,ï¿½ï¿½ï¿½Ú¶ï¿½Ì¬ï¿½ï¿½ï¿½Æ·ï¿½ï¿½ï¿½ï¿½Óµï¿½ï¿½Ù¶ï¿½
 void Shooter_Friction_Speed_Limit(void)
 {
 	if(judge_data->shoot_data.bullet_speed > (float)(judge_data->game_robot_status.shooter_id1_17mm_speed_limit))
@@ -204,6 +207,6 @@ void Shooter_Friction_Speed_Limit(void)
 		motor_friction_speed_max = FRICTION_SPEED_1;
 	}
 	FRICTION_SPEED_1 += Int16_Limit( CALC_FRICTION_SPEED_PID(), -12, 2 );
-	Int16_Constrain(&FRICTION_SPEED_1, FRICTION_MIN, motor_friction_speed_max);  //Ä¦²ÁÂÖËÙ¶È×ÜÌåÏÞÖÆ
+	Int16_Constrain(&FRICTION_SPEED_1, FRICTION_MIN, motor_friction_speed_max);  //Ä¦ï¿½ï¿½ï¿½ï¿½ï¿½Ù¶ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 }
 
