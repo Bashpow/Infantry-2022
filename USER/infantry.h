@@ -1,4 +1,4 @@
-//���ڴ��ȫ�ֺ궨��
+//���ڴ���?�ֺ궨��
 
 #ifndef __INFANTRY_H
 #define __INFANTRY_H
@@ -8,7 +8,6 @@
 
 #define VERSION "1.12"
 
-//��̨GM6020���ͷ�Ƕ�
-#define YAW_GM6020_HEAD_ANGLE 2256
+#define YAW_GM6020_HEAD_ANGLE 2099
 
 #endif

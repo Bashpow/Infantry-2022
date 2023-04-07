@@ -20,8 +20,8 @@ static Pid_Position_t motor_wave_speed_pid = NEW_POSITION_PID(10.8, 0.8, 0.2, 20
 static Pid_Position_t motor_yaw_speed_pid = NEW_POSITION_PID(1800, 0.8, 0.2, 5000, 30000, 0, 1000, 500); //yawï¿½ï¿½ï¿½ï¿½Ù¶ï¿½PID
 static Pid_Position_t motor_yaw_angle_pid = NEW_POSITION_PID(2.4, 0.01, 1.8, 5, 125, 0, 3000, 500); //yawï¿½ï¿½ï¿½ï¿½Ç¶ï¿½PID
 
-static Pid_Position_t motor_pitch_speed_pid = NEW_POSITION_PID(380, 27, 0, 220, 30000, 0, 1000, 500); //pitchï¿½ï¿½ï¿½ï¿½Ù¶ï¿½PID
-static Pid_Position_t motor_pitch_angle_pid = NEW_POSITION_PID(0.25, 0.018, 0.005, 100, 300, 0, 3000, 500); //pitchï¿½ï¿½ï¿½ï¿½Ç¶ï¿½PID
+Pid_Position_t motor_pitch_speed_pid = NEW_POSITION_PID(280, 30, 0.5, 220, 30000, 0, 1000, 500); //pitchï¿½ï¿½ï¿½ï¿½Ù¶ï¿½PID
+Pid_Position_t motor_pitch_angle_pid = NEW_POSITION_PID(0.18, 0.01, 0.002, 100, 300, 0, 3000, 500); //pitchï¿½ï¿½ï¿½ï¿½Ç¶ï¿½PID
 
 /* ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ */
 static void Can2_Hook(CanRxMsg *rx_message);
@@ -40,8 +40,8 @@ typedef enum
 	CAN_3508_FRICTION_WHEEL_DOWN_ID = 0x204,
 
 	CAN_GIMBAL_ALL_ID = 0x2FF,
-	CAN_YAW_MOTOR_ID = 0x209,  //x
-	CAN_PITCH_MOTOR_ID = 0x20A,  //y
+	CAN_YAW_MOTOR_ID = 0x20B,  //x
+	CAN_PITCH_MOTOR_ID = 0x209,  //y
 	
 } can1_msg_id_e;
 
@@ -87,14 +87,19 @@ Motor_measure_t *Get_Firction_M3508_Down_Motor(void) {
     return &friction_wheel_down_motor;
 }
 
+extern float easy_pid2_p, easy_pid2_i, easy_pid2_d;
+
 //ï¿½ï¿½ï¿½ï¿½ï¿½Ù¶ï¿½PIDï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 void Set_Gimbal_Motors_Speed(float speed_yaw, float speed_pitch)
 {
+	// motor_pitch_speed_pid.kp = easy_pid2_p;
+	// motor_pitch_speed_pid.ki = easy_pid2_i;
+	// motor_pitch_speed_pid.kd = easy_pid2_d;
 	Can_Send(2,
 			 CAN_GIMBAL_ALL_ID,
-			 Pid_Position_Calc(&motor_yaw_speed_pid, speed_yaw, gimbal_motor[0].speed_rpm),
 			 Pid_Position_Calc(&motor_pitch_speed_pid, speed_pitch, gimbal_motor[1].speed_rpm),
 			 0,
+			 Pid_Position_Calc(&motor_yaw_speed_pid, speed_yaw, gimbal_motor[0].speed_rpm),
 			 0);
 }
 
@@ -107,10 +112,14 @@ float Calc_Yaw_Angle360_Pid(float tar_angle, float cur_angle)
 	Handle_Angle360_PID_Over_Zero(&yaw_tar_angle, &yaw_cur_angle);
 	return Pid_Position_Calc(&motor_yaw_angle_pid, yaw_tar_angle, yaw_cur_angle);
 }
+extern float easy_pid_p, easy_pid_i, easy_pid_d;
 
 //ï¿½ï¿½ï¿½ï¿½Pitchï¿½ï¿½PIDï¿½ï¿½ï¿½Ç¶È¸ï¿½Ê½Îª0~8191
 float Calc_Pitch_Angle8191_Pid(float tar_angle)
 {
+	// motor_pitch_angle_pid.kp = easy_pid_p;
+	// motor_pitch_angle_pid.ki = easy_pid_i;
+	// motor_pitch_angle_pid.kd = easy_pid_d;
 	float pitch_tar_angle = tar_angle;
 	float pitch_cur_angle = gimbal_motor[1].mechanical_angle;
 	Pitch_Angle_Limit(&pitch_tar_angle,PITCH_DOWN_LIMIT,PITCH_UP_LIMIT);
@@ -119,12 +128,10 @@ float Calc_Pitch_Angle8191_Pid(float tar_angle)
 }
 
 
-//Í³Ò»ï¿½ï¿½ï¿½ï¿½canï¿½Ð¶Ïºï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ò¼ï¿½Â¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ýµï¿½Ê±ï¿½ä£¬ï¿½ï¿½Îªï¿½ï¿½ï¿½ï¿½ï¿½Ð¶ï¿½ï¿½ï¿½ï¿½ï¿½
 static void Can2_Hook(CanRxMsg *rx_message)
 {
 	switch (rx_message->StdId)
 	{
-		// ·¢Éä»ú¹¹3¸öµç»ú
 		case CAN_3508_FRICTION_WHEEL_UP_ID:
 			Calculate_Motor_Data(&friction_wheel_up_motor, rx_message);
 			Shooter_Reload(0);
@@ -139,12 +146,15 @@ static void Can2_Hook(CanRxMsg *rx_message)
 			break;
 		
 		case CAN_YAW_MOTOR_ID:
+		{
+			Calculate_Motor_Data(&gimbal_motor[0], rx_message);
+			Gimbal_Reload(0);
+			break;
+		}
 		case CAN_PITCH_MOTOR_ID:
 		{
-			uint8_t i = 0;
-			i = rx_message->StdId - CAN_YAW_MOTOR_ID;
-			Calculate_Motor_Data(&gimbal_motor[i], rx_message);
-			Gimbal_Reload(i);
+			Calculate_Motor_Data(&gimbal_motor[1], rx_message);
+			Gimbal_Reload(1);
 			break;
 		}
 		
