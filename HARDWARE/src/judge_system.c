@@ -80,7 +80,7 @@ void _Judge_System_Connect_Register(Judge_System_Connect_Item_Node *root, Judge_
 	node->next = new_item;
 }
 
-static void JudgeSystemGetRobotStatusMsgCallback(uint16_t id)
+void JudgeSystemGetRobotStatusMsgCallback(uint16_t id)
 {
 	ShooterFriction3508SpeedBaseLimit(judge_data.ext_game_robot_status_t.shooter_id1_17mm_speed_limit);
 	
@@ -113,10 +113,12 @@ void Judge_System_Connect_List_Init(void)
  
 	// 添加解析节点
 	Judge_System_Connect_Item_Register(0x0102, 4, (void*)&judge_data.ext_supply_projectile_action_t, NULL);
-	Judge_System_Connect_Item_Register(0x0201, 27, (void*)&judge_data.ext_game_robot_status_t, JudgeSystemGetRobotStatusMsgCallback);
+	// Judge_System_Connect_Item_Register(0x0201, 27, (void*)&judge_data.ext_game_robot_status_t, &JudgeSystemGetRobotStatusMsgCallback);
+	Judge_System_Connect_Item_Register(0x0201, 27, (void*)&judge_data.ext_game_robot_status_t, NULL);
 	Judge_System_Connect_Item_Register(0x0202, 16, (void*)&judge_data.ext_power_heat_data_t, NULL);
 	Judge_System_Connect_Item_Register(0x0204, 1, (void*)&judge_data.ext_buff_t, NULL);
-	Judge_System_Connect_Item_Register(0x0207, 7, (void*)&judge_data.ext_shoot_data_t, JudgeSystemGetShootMsgCallback);
+	// Judge_System_Connect_Item_Register(0x0207, 7, (void*)&judge_data.ext_shoot_data_t, &JudgeSystemGetShootMsgCallback);
+	Judge_System_Connect_Item_Register(0x0207, 7, (void*)&judge_data.ext_shoot_data_t, NULL);
 }
 
 
@@ -160,8 +162,12 @@ uint8_t Analysis_Judge_System(u8 *get_data, u16 data_len)
 			continue;
 		}
 		
+		uint16_t okId = Analysis_Cmd_Id( &get_data[ (a5_position[i]) ] ) ;
+		if(okId == 0x0201)
+			JudgeSystemGetRobotStatusMsgCallback(okId);
 		// DEBUG_PRINT("x%d len:%d p:%d id:%x\r\n", i, data_length[i], a5_position[i], Analysis_Cmd_Id( &get_data[ (a5_position[i]) ] ) );
-		
+		else if(0x0201 == 0x0207)
+			JudgeSystemGetShootMsgCallback(okId);
 	}
 	
 	return 1;
