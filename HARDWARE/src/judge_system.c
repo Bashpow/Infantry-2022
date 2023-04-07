@@ -83,6 +83,19 @@ void _Judge_System_Connect_Register(Judge_System_Connect_Item_Node *root, Judge_
 static void JudgeSystemGetRobotStatusMsgCallback(uint16_t id)
 {
 	ShooterFriction3508SpeedBaseLimit(judge_data.ext_game_robot_status_t.shooter_id1_17mm_speed_limit);
+	
+	// 模拟裁判系统断电
+	if(judge_data.ext_game_robot_status_t.mains_power_shooter_output){
+		POWER1_CTRL_ON;
+		POWER2_CTRL_ON;
+		POWER3_CTRL_ON;
+		POWER4_CTRL_ON;
+	} else {
+		POWER1_CTRL_OFF;
+		POWER2_CTRL_OFF;
+		POWER3_CTRL_OFF;
+		POWER4_CTRL_OFF;
+	}
 }
 
 /**
@@ -147,7 +160,7 @@ uint8_t Analysis_Judge_System(u8 *get_data, u16 data_len)
 			continue;
 		}
 		
-		// DEBUG_PRINT("x%d len:%d p:%d id:%d\r\n", i, data_length[i], a5_position[i], Analysis_Cmd_Id( &get_data[ (a5_position[i]) ] ) );
+		// DEBUG_PRINT("x%d len:%d p:%d id:%x\r\n", i, data_length[i], a5_position[i], Analysis_Cmd_Id( &get_data[ (a5_position[i]) ] ) );
 		
 	}
 	
