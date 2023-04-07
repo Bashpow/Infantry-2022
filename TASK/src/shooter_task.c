@@ -11,7 +11,7 @@
 #include "judge_system.h"
 
 #define COVER_OPEN()  S_PWM_OUT(2250);
-#define COVER_CLOSE() S_PWM_OUT(1415);
+#define COVER_CLOSE() S_PWM_OUT(999);
 
 #define FRICTION_MIN     1160
 #define FRICTION_MAX     1280
@@ -149,15 +149,12 @@ void Shooter_Task(void *pvParameters)
 		T_PWM_OUT(friction_speed);
 		U_PWM_OUT(friction_speed);
 
-		float up_speed = rc_pt->rc.ch0;
-		float down_speed = rc_pt->rc.ch1;
-		// printf("ch1: %d, ch2: %d\r\n",rc_pt->rc.ch0, rc_pt->rc.ch1);
-		// printf("%d %d %d %d\r\n", firction_m3508_up_wheel->mechanical_angle, firction_m3508_up_wheel->speed_rpm,
-		// firction_m3508_down_wheel->mechanical_angle,firction_m3508_down_wheel->speed_rpm);
-		/* ���ò����ٶ� */
+		float up_speed = friction_speed - FRICTION_STOP;
+		float down_speed = friction_speed - FRICTION_STOP;
+		up_speed*=10;
+		down_speed*=-10;
 		Set_Shooter_Wave_Motors_Speed(wave_speed ,up_speed, down_speed);
-		// printf("id: %d; \r\n",can2_rx_msg->StdId);
-		vTaskDelay(5);  //100HZ  ����1/10s 3����(10������)
+		vTaskDelay(5);
 	}
 	
 	//vTaskDelete(NULL);

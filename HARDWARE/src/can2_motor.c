@@ -58,16 +58,15 @@ void CAN2_RX0_IRQHandler(void)
 	
 }
 
-//���㷢��������ֵ���ٶ�PID�������?
 void Set_Shooter_Wave_Motors_Speed(float wave_wheel, float up_firction_speed, float down_firction_speed)
 {
 	Can_Send(2,
-			 CAN_SHOOTER_ALL_ID,
-			 Pid_Position_Calc(&motor_wave_speed_pid, wave_wheel, shooter_wave_motor.speed_rpm),
-			 0,
-			 Pid_Position_Calc(&friction_wheel_up_motor_speed_pid,
-			 					up_firction_speed, friction_wheel_up_motor.speed_rpm),
-			 Pid_Position_Calc(&friction_wheel_down_motor_speed_pid, down_firction_speed, 
+			CAN_SHOOTER_ALL_ID,
+			Pid_Position_Calc(&motor_wave_speed_pid, wave_wheel, shooter_wave_motor.speed_rpm),
+			0,
+			Pid_Position_Calc(&friction_wheel_up_motor_speed_pid,
+								up_firction_speed, friction_wheel_up_motor.speed_rpm),
+			Pid_Position_Calc(&friction_wheel_down_motor_speed_pid, down_firction_speed, 
 			 					friction_wheel_down_motor.speed_rpm));
 }
 
