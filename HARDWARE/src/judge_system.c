@@ -7,6 +7,9 @@
 #include "power_output.h"
 #include "detect_task.h"
 
+// 回调头文件
+#include "shooter_task.h"
+
 /* 裁判系统调试宏定义 */
 #if 0
 	#define JUDGE_LOG DEBUG_LOG
@@ -77,6 +80,11 @@ void _Judge_System_Connect_Register(Judge_System_Connect_Item_Node *root, Judge_
 	node->next = new_item;
 }
 
+static void JudgeSystemGetRobotStatusMsgCallback(uint16_t id)
+{
+	ShooterFriction3508SpeedBaseLimit(judge_data.ext_game_robot_status_t.shooter_id1_17mm_speed_limit);
+}
+
 /**
  * @brief 初始化裁判系统数据连接列表，将要解析的数据都加入该初始化函数
  * 
@@ -92,10 +100,10 @@ void Judge_System_Connect_List_Init(void)
  
 	// 添加解析节点
 	Judge_System_Connect_Item_Register(0x0102, 4, (void*)&judge_data.ext_supply_projectile_action_t, NULL);
-	Judge_System_Connect_Item_Register(0x0201, 27, (void*)&judge_data.ext_game_robot_status_t, NULL);
+	Judge_System_Connect_Item_Register(0x0201, 27, (void*)&judge_data.ext_game_robot_status_t, JudgeSystemGetRobotStatusMsgCallback);
 	Judge_System_Connect_Item_Register(0x0202, 16, (void*)&judge_data.ext_power_heat_data_t, NULL);
 	Judge_System_Connect_Item_Register(0x0204, 1, (void*)&judge_data.ext_buff_t, NULL);
-	Judge_System_Connect_Item_Register(0x0207, 7, (void*)&judge_data.ext_shoot_data_t, NULL);
+	Judge_System_Connect_Item_Register(0x0207, 7, (void*)&judge_data.ext_shoot_data_t, JudgeSystemGetShootMsgCallback);
 }
 
 
