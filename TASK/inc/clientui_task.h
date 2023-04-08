@@ -7,6 +7,6 @@
 
 extern TaskHandle_t ClientuiTask_Handler;
 void Clientui_Task(void *pvParameters);
-
+void ChangeClientUiDrawStatus(void);
 
 #endif // __CLIENTUI_TASK_H_

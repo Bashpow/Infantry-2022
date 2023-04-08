@@ -8,6 +8,7 @@
 #include "chassis_task.h"
 #include "shooter_task.h"
 #include "detect_task.h"
+#include "clientui_task.h"
 
 #define S1_VALUE       remote_controller.rc.s1
 #define S2_VALUE       remote_controller.rc.s2
@@ -103,6 +104,12 @@ void Remoter_Task(void *pvParameters)
 
 			/* 射击按钮 */
 			Shoot_Key_Control();
+
+			if(KEY_CLICKED(KEY_B))
+			{
+				//重绘、取消绘制ui
+				ChangeClientUiDrawStatus();
+			}
 			
 			/* 保存本次遥控器状态 */
 			Rc_Data_Copy(&last_time_rc, &remote_controller);
