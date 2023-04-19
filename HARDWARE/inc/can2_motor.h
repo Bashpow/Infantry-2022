@@ -4,9 +4,9 @@
 #include "stm32f4xx.h"
 #include "motor.h"
 
-#define PITCH_UP_LIMIT (994)
-#define PITCH_MID_ANGLE (1533)//((PITCH_UP_LIMIT+PITCH_DOWN_LIMIT)/2)
-#define PITCH_DOWN_LIMIT (2397)
+#define PITCH_UP_LIMIT (6550)
+#define PITCH_MID_ANGLE ((PITCH_UP_LIMIT+PITCH_DOWN_LIMIT)/2)
+#define PITCH_DOWN_LIMIT (7825)
 
 void Set_Shooter_Wave_Motors_Speed(float wave_wheel,float up_firction_speed, float down_firction_speed);
 void Set_Gimbal_Motors_Speed(float speed_yaw, float speed_pitch);

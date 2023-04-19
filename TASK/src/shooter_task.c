@@ -53,7 +53,7 @@ const static Robot_mode_t* shooter_robot_mode;
 const static Judge_data_t* judge_data;
 Pid_Position_t motor_friction_speed_pid = NEW_POSITION_PID(2.0f, 0.1, 0, 8, 12, 0, 1000, 500);
 static Pid_Position_t motor_friction3508_speed_pid = NEW_POSITION_PID(5.0f, 0.1, 0, 8, 12, 0, 1000, 500);
-static int16_t motor_friction_speed_max;
+//static int16_t motor_friction_speed_max;
 static int16_t motor_friction3508_speed_max;
 Motor_measure_t *firction_m3508_up_wheel;
 Motor_measure_t *firction_m3508_down_wheel;
@@ -180,7 +180,8 @@ static void Shoot_End_Friction3508_Speed_Subtract(uint16_t minus_speed)
 {
 	if(Get_Module_Online_State(5))
 	{
-		if (judge_data->shoot_data.bullet_speed > ((float)(judge_data->game_robot_status.shooter_id1_17mm_speed_limit) - 2.0f))
+		if (judge_data->ext_shoot_data_t.bullet_speed >
+			((float)(judge_data->ext_game_robot_status_t.shooter_id1_17mm_speed_limit) - 1.0f))
 		{
 			FRICTION_SPEED_1 -= minus_speed;
 		}
@@ -252,6 +253,8 @@ int32_t ShooterSpeedToFrictionSpeed(int16_t shooter_speed) {
 // !!! ÒÔÏÂ²»ÓÃ¹Ü
 //ÒÔÏÂÊÇÀÏ°æ±¾³ÌÐò£¬snailµç»úÓÃ
 
+/*
+
 // speed -> pwm
 // y = -0.0019x4 + 0.1998x3 - 6.8204x2 + 99.437x + 648.01
 static uint16_t Shooter_Friction_Speed_To_Pwm(float speed)
@@ -295,3 +298,4 @@ void Shooter_Friction_Speed_Limit(void)
 	Int16_Constrain(&FRICTION_SPEED_1, FRICTION_MIN, motor_friction_speed_max);  //Ä¦ï¿½ï¿½ï¿½ï¿½ï¿½Ù¶ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½
 }
 
+*/

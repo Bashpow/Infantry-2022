@@ -55,6 +55,12 @@ void NMI_Handler(void)
 {
 }
 
+void SoftReset(void)
+{
+  __set_FAULTMASK(1); // 关闭所有中端
+  NVIC_SystemReset(); // 复位
+}
+
 /**
   * @brief  This function handles Hard Fault exception.
   * @param  None
@@ -65,6 +71,7 @@ void HardFault_Handler(void)
   /* Go to infinite loop when Hard Fault exception occurs */
   while (1)
   {
+    SoftReset();
   }
 }
 

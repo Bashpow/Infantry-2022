@@ -8,6 +8,6 @@
 
 #define VERSION "1.12"
 
-#define YAW_GM6020_HEAD_ANGLE 2099
+#define YAW_GM6020_HEAD_ANGLE 2756
 
 #endif

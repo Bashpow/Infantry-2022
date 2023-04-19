@@ -301,16 +301,16 @@ uint8_t Analysis_Data(u8 *get_data, uint16_t data_len)
 
 // 不该放这的函数，之后必须改掉
 // 判断1号17mm发射机构是否超热量
-u8 Is_Id1_17mm_Excess_Heat(const Judge_data_t* judge_data)
+uint8_t Is_Id1_17mm_Excess_Heat(const Judge_data_t* judge_data)
 {
-	if(judge_data->ext_game_robot_status_t.shooter_id1_17mm_cooling_limit == 65535 || Get_Module_Online_State(5) == 0)
-	{
+	if(judge_data->ext_game_robot_status_t.shooter_id1_17mm_cooling_limit == 65535
+		|| Get_Module_Online_State(5) == 0)
 		return 0;
-	}
-	if(judge_data->ext_game_robot_status_t.shooter_id1_17mm_cooling_limit <= (judge_data->power_heat_data.shooter_id1_17mm_cooling_heat + 12 ))
-	{
+	
+	if(judge_data->ext_game_robot_status_t.shooter_id1_17mm_cooling_limit 
+		<= (judge_data->ext_power_heat_data_t.shooter_id1_17mm_cooling_heat + 20 ))
 		return 1;
-	}
+	
 	return 0;
 }
 

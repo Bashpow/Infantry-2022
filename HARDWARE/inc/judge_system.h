@@ -44,40 +44,6 @@ void _Judge_System_Connect_Register(Judge_System_Connect_Item_Node *root, Judge_
 
 typedef  struct
 {
-	// ÆúÓÃ
-	__packed struct
-	{
-		uint8_t robot_id;
-		uint8_t robot_level;
-		uint16_t remain_HP;
-		uint16_t max_HP;
-		uint16_t shooter_id1_17mm_cooling_rate;
-		uint16_t shooter_id1_17mm_cooling_limit;
-		uint16_t shooter_id1_17mm_speed_limit;
-		uint16_t shooter_id2_17mm_cooling_rate;
-		uint16_t shooter_id2_17mm_cooling_limit;
-		uint16_t shooter_id2_17mm_speed_limit;
-		uint16_t shooter_id1_42mm_cooling_rate;
-		uint16_t shooter_id1_42mm_cooling_limit;
-		uint16_t shooter_id1_42mm_speed_limit;
-		uint16_t chassis_power_limit;
-		uint8_t mains_power_gimbal_output : 1;
-		uint8_t mains_power_chassis_output : 1;
-		uint8_t mains_power_shooter_output : 1;
-	}game_robot_status;
-	
-	// ÆúÓÃ
-	__packed struct
-	{
-		uint16_t chassis_volt; 
-		uint16_t chassis_current; 
-		float chassis_power; 
-		uint16_t chassis_power_buffer; 
-		uint16_t shooter_id1_17mm_cooling_heat;
-		uint16_t shooter_id2_17mm_cooling_heat;
-		uint16_t shooter_id1_42mm_cooling_heat;
-	}power_heat_data;
-
 	// cmd_id 0x0102
 	__packed struct
 	{
@@ -136,15 +102,6 @@ typedef  struct
 		float bullet_speed;
 	} ext_shoot_data_t;
 
-	// ÆúÓÃ
-	__packed struct
-	{
-		uint8_t bullet_type;
-		uint8_t shooter_id;
-		uint8_t bullet_freq;
-		float bullet_speed;
-	}shoot_data;
-
 }Judge_data_t;
 
 void Judge_System_Connect_List_Init(void);
@@ -153,6 +110,6 @@ const Judge_data_t* Get_Judge_Data(void);
 
 uint8_t Analysis_Judge_System(u8 *get_data, u16 data_len);
 
-u8 Is_Id1_17mm_Excess_Heat(const Judge_data_t* judge_data);
+uint8_t Is_Id1_17mm_Excess_Heat(const Judge_data_t* judge_data);
 
 #endif

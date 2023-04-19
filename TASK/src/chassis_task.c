@@ -86,7 +86,7 @@ void Chassis_Task(void *pvParameters)
 				case 2:
 				{
 					Calc_Gyro_Motors_Speed(motor_speed, \
-					Calc_Gyro_Speed_By_Power_Limit(judge_data->game_robot_status.chassis_power_limit), \
+					Calc_Gyro_Speed_By_Power_Limit(judge_data->ext_game_robot_status_t.chassis_power_limit), \
 					GM6020_YAW_Angle_To_360(yaw_motor->mechanical_angle), \
 					(float)remoter_control->virtual_rocker.ch3 * CHASSIS_MOTOR_GYRO_BASE_RATE * chassis_motor_boost_rate, \
 					(float)remoter_control->virtual_rocker.ch2 * CHASSIS_MOTOR_GYRO_BASE_RATE * chassis_motor_boost_rate );
@@ -139,7 +139,7 @@ void Chassis_Task(void *pvParameters)
 				case 4:
 				{
 					Calc_Gyro_Motors_Speed(motor_speed, \
-					Calc_Gyro_Speed_By_Power_Limit(judge_data->game_robot_status.chassis_power_limit), \
+					Calc_Gyro_Speed_By_Power_Limit(judge_data->ext_game_robot_status_t.chassis_power_limit), \
 					GM6020_YAW_Angle_To_360(yaw_motor->mechanical_angle), \
 					remoter_control->rc.ch3 * 8.0f, \
 					remoter_control->rc.ch2 * 8.0f);
